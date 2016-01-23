@@ -81,7 +81,9 @@ public class ClientHandler extends Thread implements Constants3 {
 	 * broken and shutdown() will be called. 
 	 */
 	public void run() {
-
+		// Present options to client
+		sendMessageToClient(getOptions() + "\n");
+		
 		// Chat-loop
 		char[] inputChars = new char[1024];
 		int charsRead = 0;
@@ -168,10 +170,10 @@ public class ClientHandler extends Thread implements Constants3 {
 	// GETTERS AND SETTERS ------------------------------------------------
 	public String getOptions() {
 		String optionsMenu = "\nOptions menu:\n " +
-				"1. PLAY: Play a game agains a random person." + 
-				"2. CHALLENGE: Challenge a specific player." + 
-				"3. PRACTICE: Practice against a computer player" +
-				"4. CHAT: Send a message to the players in the lobby.";
+				"1. PLAY: Play a game agains a random person.\n" + 
+				"2. CHALLENGE: Challenge a specific player.\n" + 
+				"3. PRACTICE: Practice against a computer player\n" +
+				"4. CHAT: Send a message to the players in the lobby.\n";
 		return optionsMenu;
 	}
 
