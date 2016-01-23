@@ -139,7 +139,7 @@ public class NetworkIOParser implements Constants3 {
 								break outerloop;
 							}
 						}
-					
+
 				}
 			} else {
 				// Do Nothing
@@ -159,7 +159,7 @@ public class NetworkIOParser implements Constants3 {
 			int xCo = -1;
 			int yCo = -1;
 			int choiceIndex = -999;
-			boolean isValidInput = false;
+			//			boolean isValidInput = false;
 
 			// Initialize regex patterns
 			String patternOneLetter = "[a-zA-Z]";
@@ -171,29 +171,34 @@ public class NetworkIOParser implements Constants3 {
 			if (amountArgs == 1) {
 				//TODO: GETTING THE PASS COMMAND RIGHT
 				String singleInputArg = stringParts[1].trim();
+
 				if (singleInputArg.equalsIgnoreCase("pass")) {
 					System.out.println("Parsing the pass move command");
-					choiceIndex = -1;
-					clientHandler.sendMessageToClient(PASS);
-					isValidInput = true;
-				} else if (singleInputArg.length() == 1) {
+					//					choiceIndex = -1;
+					clientHandler.sentParsedMoveToGoGameServer(PASS);
+					//					clientHandler.sendMessageToClient(PASS);
+					//					isValidInput = true;
+
+				} else if (singleInputArg.matches(patternOneLetter)) {
+					// INPUT SINGLE LETTER
+					String noValidInput = "A single letter is no valid input... \n";
+					System.out.println(noValidInput);
+					clientHandler.sendMessageToClient(INVALIDMOVE);
+
+				} else if (singleInputArg.matches(patternOneNumber)) {
 					System.out.println("Parsing the one argument move command");
-					if (singleInputArg.matches(patternOneLetter)) {
-						// INPUT SINGLE LETTER
-						String noValidInput = "A single letter is no valid input... \n";
-						System.out.println(noValidInput);
-						clientHandler.sendMessageToClient(INVALIDMOVE);
-					} else if (singleInputArg.matches(patternOneNumber)) {
-						// INPUT INDEX
-						choiceIndex = Integer.parseInt(singleInputArg) - 1;
-						isValidInput = true;
-					} else {
-						// OR ELSE....
-						String noValidInput = "No valid input, try again... \n";
-						System.out.println(noValidInput);
-						clientHandler.sendMessageToClient(INVALIDMOVE);
-					}
+					// INPUT INDEX
+					choiceIndex = Integer.parseInt(singleInputArg) - 1;
+					//						isValidInput = true;
+					clientHandler.sentParsedMoveToGoGameServer(choiceIndex);
+
+				} else {
+					// OR ELSE....
+					String noValidInput = "No valid input, try again... \n";
+					System.out.println(noValidInput);
+					clientHandler.sendMessageToClient(INVALIDMOVE);
 				}
+
 
 				// If input is length 2, check if (number,number) or (letter, number)
 			} else if (amountArgs == 2) {
@@ -205,7 +210,8 @@ public class NetworkIOParser implements Constants3 {
 				if (firstArg.matches(patternOneNumber) && secondArg.matches(patternOneNumber)) {	
 					xCo = Integer.parseInt(firstArg);
 					yCo = Integer.parseInt(secondArg);
-					isValidInput = true;
+					//					isValidInput = true;
+					clientHandler.sentParsedMoveToGoGameServer(xCo, yCo);
 
 					// Pattern 2: Letter Number	
 				} else if (firstArg.matches(patternOneLetter) && secondArg.matches(patternOneNumber)) {
@@ -215,7 +221,9 @@ public class NetworkIOParser implements Constants3 {
 					xCo = ch[0] - 'a' + 1;
 					yCo = Integer.parseInt(secondArg);
 					//						choice = board.index(rowInt - 1, Integer.parseInt(secondArg) - 1);
-					isValidInput = true;
+					//					isValidInput = true;
+					clientHandler.sentParsedMoveToGoGameServer(xCo, yCo);
+
 				} else {
 					String noValidInput = "No valid input, try again... \n";
 					System.out.println(noValidInput);
@@ -232,15 +240,16 @@ public class NetworkIOParser implements Constants3 {
 			}
 
 
-			if(isValidInput) {
-				clientHandler.sentParsedMoveToGoGameServer(xCo, yCo);
-			}
+			//			if(isValidInput) {
+			//				clientHandler.sentParsedMoveToGoGameServer(xCo, yCo);
+			//			}
 
 
 
 			break;
 		case PASS:
-			//TODO: PROTOCOL COMMAND PASS
+			// Send the MOVE COMMAND INCLUDING PASS
+			clientHandler.sendMessageToServer(MOVE + DELIMITER + PASS);
 			break;
 
 		case GETBOARD: 
@@ -325,7 +334,7 @@ public class NetworkIOParser implements Constants3 {
 					clientHandler.sendMessageToClient(notAvailableMessage);
 					clientHandler.sendMessageToClient(PLAYERNOTAVAILABLE);
 				}
-				
+
 				clientHandler.setPendingChallengeStatus(true);
 
 			} else {
@@ -428,32 +437,32 @@ public class NetworkIOParser implements Constants3 {
 						}
 					}
 			}
-		break; 
+			break; 
 
 		case CHALLENGEDENIED:
 			HashMap<String, String> challengePartners = server.getChallengePartners();
 
 			// PARSED BY THE CHALLENGER
 			if (clientHandler.getPendingChallengeStatus()) { 
-			nameChallenger = clientHandler.getClientName().trim();
-			nameChallenged = "";
-			extraloop:
-				for (Entry<String, String> entry : challengePartners.entrySet()) {
-					if ( nameChallenger.equals( entry.getValue() ) ) {
-						nameChallenged = entry.getKey().trim();
-						clientHandler.sendMessageToClient("Your challenge has been denied by " + nameChallenged + ", please try again!");
-						break extraloop;
+				nameChallenger = clientHandler.getClientName().trim();
+				nameChallenged = "";
+				extraloop:
+					for (Entry<String, String> entry : challengePartners.entrySet()) {
+						if ( nameChallenger.equals( entry.getValue() ) ) {
+							nameChallenged = entry.getKey().trim();
+							clientHandler.sendMessageToClient("Your challenge has been denied by " + nameChallenged + ", please try again!");
+							break extraloop;
+						}
 					}
-				}
-			
-			clientHandler.setPendingChallengeStatus(false);
-			challengePartners.remove(nameChallenged);
-			
+
+				clientHandler.setPendingChallengeStatus(false);
+				challengePartners.remove(nameChallenged);
+
 			} else {
 				// PARSED BY THE PERSON BEING CHALLENGED
 				nameChallenged = clientHandler.getClientName().trim();
 				nameChallenger = challengePartners.get(nameChallenged);
-				
+
 				List<ClientHandler> availablePlayers = this.server.getPlayers();
 				outerloop:
 					for (ClientHandler temp : availablePlayers) {
@@ -470,7 +479,7 @@ public class NetworkIOParser implements Constants3 {
 
 			// OBSERVER ------------------------------------------------------------------
 		case OBSERVER: 
-			
+
 			d = 1; break; //OBSERVER";
 		case COMPUTERPLAYER: d = 1; break; //COMPUTERPLAYER";
 		//			case BOARDSIZES: d = 1; break; //BOARDSIZES";
@@ -486,10 +495,10 @@ public class NetworkIOParser implements Constants3 {
 
 		// AI
 		case PRACTICE: 
-//			outputCommand = GAMESTART;
+			//			outputCommand = GAMESTART;
 			nameChallenged = COMPUTER; 
 			String gameArgs = nameChallenged + DELIMITER + BOARDSIZE + DELIMITER + BLACK;
-//			clientHandler.sendMessageToClient(GAMESTART + DELIMITER + gameArgs);
+			//			clientHandler.sendMessageToClient(GAMESTART + DELIMITER + gameArgs);
 			clientHandler.sendMessageToServer(GAMESTART + DELIMITER + gameArgs);
 			break; //PRACTICE";
 		case COMPUTER: d = 1; break; //COMPUTER";

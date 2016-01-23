@@ -32,6 +32,9 @@ public class ClientHandler extends Thread implements Constants3 {
 	// Keep track of making a move
 	private boolean moveHasBeenMade;
 	private int[] lastMove = {-999, -999};
+	private boolean passMoveMade;
+	private boolean indexMoveMade;
+	private int lastIndexMove;
 
 	// Constructor ----------------------------------------------------------------
 
@@ -169,7 +172,7 @@ public class ClientHandler extends Thread implements Constants3 {
 
 	// GETTERS AND SETTERS ------------------------------------------------
 	public String getOptions() {
-		String optionsMenu = "\nOptions menu:\n " +
+		String optionsMenu = "\nOptions menu:\n" +
 				"1. PLAY: Play a game agains a random person.\n" + 
 				"2. CHALLENGE: Challenge a specific player.\n" + 
 				"3. PRACTICE: Practice against a computer player\n" +
@@ -213,8 +216,8 @@ public class ClientHandler extends Thread implements Constants3 {
 
 
 	public boolean sentParsedMoveToGoGameServer(int xCo, int yCo) {
-		System.out.println("A move has been registered by the client handler");
-		this.sendMessageToClient("Your move is registered, checking validity...");
+		System.out.println("A (x,y) move has been registered by the client handler");
+		this.sendMessageToClient("\nYour move is registered, checking validity...\n");
 		
 		// Misschien niet nodig
 //		goGameServer.ParseMove(xCo, yCo);
@@ -222,13 +225,59 @@ public class ClientHandler extends Thread implements Constants3 {
 		this.lastMove[0] = xCo;
 		this.lastMove[1] = yCo;
 		// Toggle the boolean, die wordt opgevraagd door de human player player (blijft tot die tijd in een while loop hangen)
-		this.moveHasBeenMade = true;
+		setMoveHasBeenMade(true);
+		setPassMoveMade(false);
 
 		return this.moveHasBeenMade;
 	}
 	
+	public boolean sentParsedMoveToGoGameServer(String passMove) {
+		System.out.println("A passing move has been registered by the client handler");
+		this.sendMessageToClient("\nYour pass move is registered\n");
+		
+		// Toggle the boolean, die wordt opgevraagd door de human player player (blijft tot die tijd in een while loop hangen)
+		setMoveHasBeenMade(true);
+		setPassMoveMade(true);
+		
+		return this.moveHasBeenMade;
+	}
+	
+	public boolean sentParsedMoveToGoGameServer(int fieldIndex) {
+		System.out.println("A fieldIndex move has been registered by the client handler");
+		this.sendMessageToClient("\n Your fieldIndex move is registered \n");
+		
+		// Toggle the boolean, die wordt opgevraagd door de human player player (blijft tot die tijd in een while loop hangen)
+		setMoveHasBeenMade(true);
+		setPassMoveMade(false);
+		setIndexMoveMade(true);
+		this.lastIndexMove = fieldIndex;
+		
+		return this.moveHasBeenMade;
+	}
+	
+	public void setIndexMoveMade(boolean indexMoveMade) {
+		this.indexMoveMade = indexMoveMade;	
+	}
+
+	public boolean getIndexMoveMade() {
+		return this.indexMoveMade;
+	}
+
+	public void setPassMoveMade(boolean passMoveMade) {
+		this.passMoveMade = passMoveMade;
+	}
+	
+	public boolean getPassMoveMade() {
+		return this.passMoveMade;
+	}
+	
 	public int[] getLastMove() {
 		return this.lastMove;
+	}
+	
+	public int getLastIndexMove() {
+		// TODO Auto-generated method stub
+		return this.lastIndexMove;
 	}
 	
 	public boolean getMoveHasBeenMade() {
@@ -261,4 +310,7 @@ public class ClientHandler extends Thread implements Constants3 {
 		
 		return stringBoard;
 	}
+
+
+	
 }

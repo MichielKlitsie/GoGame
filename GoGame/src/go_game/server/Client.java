@@ -77,7 +77,7 @@ public class Client extends Thread implements Constants2 {
 			client.start();
 
 			do {
-				System.out.println("Enter something:");
+//				System.out.println("Enter something:");
 				String input = readString("");
 				client.sendMessage(input);
 				

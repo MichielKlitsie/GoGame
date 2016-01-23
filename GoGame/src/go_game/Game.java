@@ -178,6 +178,7 @@ public class Game implements Constants3 {
 			// Step 2: Keep trying to make moves until a valid move is made
 			boolean isValidMove = false;
 			int choice = -999;
+			
 			while(!isValidMove) {
 				choice = this.players[this.current].makeMove(board);
 				isValidMove = checkLegalMove(choice);
@@ -186,7 +187,7 @@ public class Game implements Constants3 {
 			// Step 3: Keep track of two passes in a row
 			if (previousTurnPassed && choice == -1) {
 				// QUIT GAME
-				String quitMessage = "Two passes in a row, game is quit!";
+				String quitMessage = "\n\nTwo passes in a row, game is quit!\n\n";
 				System.out.println(quitMessage);
 				sendMessageToBoth(quitMessage);
 				isGameOver = true;
@@ -204,7 +205,7 @@ public class Game implements Constants3 {
 			this.current = (current + 1) % 2;
 		}
 
-		// Print the final result, who has won
+		// Print the final result, who has won!
 		this.printResult();
 	}
 
@@ -227,7 +228,7 @@ public class Game implements Constants3 {
 	 * Prints the result of the last game. <br>
 	 */
 	private void printResult() {
-		System.out.println("\n \n When implemented, the most amazing score is presented here! \n \n");
+		
 		Map<String, Integer> scores = board.calculateScore();
 		Integer scoreBlack = scores.get("BLACK");
 		Integer scoreWhite = scores.get("WHITE");
@@ -242,7 +243,9 @@ public class Game implements Constants3 {
 			}
 		}
 		
-		System.out.println("The final score is: Black " + scoreBlack + " vs. White " + scoreWhite);
+		String scoreString = "\nThe final score is: Black " + scoreBlack + " vs. White " + scoreWhite + "\n"; 
+		System.out.println(scoreString);
+		sendMessageToBoth(scoreString);
 		
 	}
 
@@ -270,6 +273,8 @@ public class Game implements Constants3 {
 		boolean validMove = false;
 		if(board.isField(indexField) && board.isEmptyField(indexField)) {
 			validMove = checkRulesMove(board, indexField);
+		} else if (indexField == -1) {
+			validMove = true;
 		};
 		return validMove; 	
 	}

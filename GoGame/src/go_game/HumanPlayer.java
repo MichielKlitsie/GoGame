@@ -55,7 +55,7 @@ public class HumanPlayer extends Player {
 		// What does the human player see when making a move
 		String prompt = "> " + getName() + " (" + getMark().toString() + ")"
 				+ ", what is your choice? \n" +
-				"INPUT: MOVE (int row, int column), MOVE (char row, int column), MOVE index or MOVE 'pass' \n" +
+				"INPUT: MOVE (int row, int column), MOVE (char row, int column), MOVE index or MOVE 'PASS' \n" +
 				"Enter input: ";
 
 		// Scan for input, see method readInt(prompt) below
@@ -76,20 +76,28 @@ public class HumanPlayer extends Player {
 		clientHandler.setMoveHasBeenMade(false);
 				//clientHandler.waitForInput();
 		
-		// Obtain result of determine move
-		int[] lastMove = clientHandler.getLastMove();
-		System.out.println("Last move in HumanPlayer: (" + lastMove[0] + ", " + lastMove[1] + ")");
-
-		choice = board.index(lastMove[0] - 1, lastMove[1] - 1);
-		
-		
 		// Convert the input to the a field. Example (A,1) = 0 or (C,5) = 22
-		if (choice == -1) {
+		if (clientHandler.getPassMoveMade()) {
 			String passMessage = this.getName() + " has passed on his turn...";
 			System.out.println(passMessage);
+			
+			clientHandler.setPassMoveMade(false);
+			
 			clientHandler.sendMessageToClient(passMessage);
-			return choice;
+			choice = -1;
+//			return choice;
+		} else if (clientHandler.getIndexMoveMade()) {
+			choice = clientHandler.getLastIndexMove();
+			clientHandler.setIndexMoveMade(false);
+		} else {
+			// Obtain result of determine move
+			int[] lastMove = clientHandler.getLastMove();
+			System.out.println("Last move in HumanPlayer: (" + lastMove[0] + ", " + lastMove[1] + ")");
+	
+			choice = board.index(lastMove[0] - 1, lastMove[1] - 1);
 		}
+		
+		
 		return choice;
 	}
 
