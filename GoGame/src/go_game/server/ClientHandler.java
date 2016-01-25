@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import go_game.Board;
 import go_game.Mark;
@@ -26,15 +28,51 @@ public class ClientHandler extends Thread implements Constants3 {
 	private String clientName;
 	private NetworkIOParser mNetworkIOParser;
 	private boolean terminated = false;
-	private boolean pendingChallengeStatus;
+	
+	// The server thread that plays a game
 	private GoGameServer goGameServer;
 	
-	// Keep track of making a move
+	// STATES of the Client
+	private boolean isPendingChallenge;
 	private boolean moveHasBeenMade;
-	private int[] lastMove = {-999, -999};
 	private boolean passMoveMade;
 	private boolean indexMoveMade;
+	private boolean isWaiting;
+	private boolean isPlaying;
+	private boolean inLobby;
+	private boolean isAlreadyChallenged;
+	
+
+	// Keep track of making a move
+	private int[] lastMove = {-999, -999};
 	private int lastIndexMove;
+	private Logger logger;
+	private ClientHandler clientHandlerOpponent;
+	
+	// OPTIONS MENUs corresponding to different states
+	// TODO: FINALIZE THE OPTION MENUS
+	private String optionsMenuLobby = "\nOptions menu lobby:\n" +
+			"1. PLAY: Play a game agains a random person.\n" + 
+			"2. CHALLENGE/AVAILABLEPLAYERS: Get a list of the people in the lobby.\n" +
+			"3. CHALLENGE <namePlayer>: Challenge a specific player in the lobby.\n" +
+			"4. PRACTICE: Practice against a computer player.\n" +
+			"5. CHAT: Send a message to the players in the lobby.\n" +
+			"6. CURRENTGAMES: Get a list of the people playing a game. \n" +
+			"7. extra options: tba. \n" +
+			"x. GETOPTIONS: Get this options menu.\n";
+	private String optionsMenuPlaying = "\nOptions menu playing:\n" +
+			"1. MOVE: Play a move in the game. Input as 'MOVE int row, int column', 'MOVE char row, int column', 'MOVE index' or 'MOVE PASS'.\n" + 
+			"2. PASS: Challenge a specific player.\n" + 
+			"5. CHAT: Send a message to the opponent players.\n" +
+			"4. ...: ....\n" + 
+			"x. GETOPTIONS: Get this options menu.\n";
+	private String optionsMenuPendingChallenge = "\nOptions menu pending challenge:\n" +
+			"5. CHAT: Send a message to the players in the lobby.\n" +
+			"6. CURRENTGAMES: Get a list of the people playing a game. \n" +
+			"x. GETOPTIONS: Get this options menu.\n";
+	private String optionsMenuWaitingOnMove = "\nOptions menu waiting on move:\n" +
+			"5. CHAT: Send a message to the opponent players.\n" +
+			"x. GETOPTIONS: Get this options menu.\n";
 
 	// Constructor ----------------------------------------------------------------
 
@@ -49,9 +87,17 @@ public class ClientHandler extends Thread implements Constants3 {
 		this.in = new BufferedReader(new InputStreamReader(sockArg.getInputStream(), "UTF-8"));
 		this.out = new BufferedWriter( new OutputStreamWriter(sockArg.getOutputStream(), "UTF-8"));
 		clientName = in.readLine(); 
-		setPendingChallengeStatus(false);
-		//System.out.println(clientName + "'s thread started");
+	
+		//logger.log(Level.INFO,clientName + "'s thread started");
 		mNetworkIOParser = new NetworkIOParser(this, serverArg);
+		logger = server.LOGGER;
+		
+		// Set initial state to in the Lobby
+		setPendingChallengeStatus(false);
+		setIsInLobby(true);
+		setIsPlaying(false);
+		setIsWaiting(false);
+		setIsAlreadyChallenged(false);
 	}
 
 
@@ -70,7 +116,7 @@ public class ClientHandler extends Thread implements Constants3 {
 	public void deny() throws IOException {
 //		clientName = in.readLine(); //<---- HIER GEBLEVEN
 //		server.broadcast("USER_DENIED");
-		System.out.println("Still implement the request denied service");
+		logger.log(Level.INFO,"Still implement the request denied service");
 	}
 
 	// Run ----------------------------------------------------------------------------------
@@ -85,7 +131,7 @@ public class ClientHandler extends Thread implements Constants3 {
 	 */
 	public void run() {
 		// Present options to client
-		sendMessageToClient(getOptions() + "\n");
+		sendMessageToClient(getOptionsLobby() + "\n");
 		
 		// Chat-loop
 		char[] inputChars = new char[1024];
@@ -97,7 +143,7 @@ public class ClientHandler extends Thread implements Constants3 {
 					String temp = new String(inputChars).substring(0, charsRead);
 					
 					// Show the command on the server side
-					System.out.println("Command received: " + temp);
+					logger.log(Level.INFO,"Command received: " + temp);
 					
 					// Parse input string, optional outputString?
 					String outputString = mNetworkIOParser.parseInput(temp);
@@ -127,7 +173,7 @@ public class ClientHandler extends Thread implements Constants3 {
 	
 	public void sendMessageToServer(String msg) {
 		// Show the command on the server side
-		System.out.println("Command received: " + msg);
+		logger.log(Level.INFO,"Command received: " + msg);
 		
 		// Parse input string, optional outputString?
 		String outputString = mNetworkIOParser.parseInput(msg);
@@ -148,21 +194,19 @@ public class ClientHandler extends Thread implements Constants3 {
 		terminated = true;
 		
 	}
-	
 
-	// <-------------------------------------------------------------------------------
-	// <---- HIER GEBLEVEN ------------------------------------------------------------
-	// <-------------------------------------------------------------------------------
 	
 	// MAAK THE MESSAGE TO SERVER TO START THE GAME
 	public void sendGameStartToServer(String nameChallenger, String nameChallenged, int boardDim, String strMarkChallenger, ClientHandler clientHandlerChallenger) {
-		// Get the right In and Outputstreams of the socket
-//		BufferedReader inChallenged = this.in;
-//		BufferedWriter outChallenged = this.out;
-//		// And those from the challenger
-//		BufferedReader inChallenger = clientHandlerChallenger.in;
-//		BufferedWriter outChallenger = clientHandlerChallenger.out;
 		
+		// Set the opponent
+		setClientHandlerOpponent(clientHandlerChallenger);
+		
+		// Change state of clientHandler of the challenged and the challenger
+		setIsPlaying(true);
+		setIsInLobby(false);
+		clientHandlerChallenger.setIsPlaying(true);
+		clientHandlerChallenger.setIsInLobby(false);
 		
 		// And let the server create a new thread which executes the game with the corresponding sockets used for communication
 		this.goGameServer = server.startGameThread(nameChallenger, nameChallenged, boardDim, strMarkChallenger, 
@@ -171,15 +215,21 @@ public class ClientHandler extends Thread implements Constants3 {
 	}
 
 	// GETTERS AND SETTERS ------------------------------------------------
-	public String getOptions() {
-		String optionsMenu = "\nOptions menu:\n" +
-				"1. PLAY: Play a game agains a random person.\n" + 
-				"2. CHALLENGE: Challenge a specific player.\n" + 
-				"3. PRACTICE: Practice against a computer player\n" +
-				"4. CHAT: Send a message to the players in the lobby.\n";
-		return optionsMenu;
+	public String getOptionsLobby() {
+		return this.optionsMenuLobby;
+	}
+	
+	public String getOptionsGame() {
+		return this.optionsMenuPlaying;
 	}
 
+	public String getOptionsPendingChallenge() {
+		return this.optionsMenuPendingChallenge;
+	}
+
+	public String getOptionsWaitingOnMove() {
+		return this.optionsMenuWaitingOnMove;
+	}
 
 	/**
 	 * This method will return the client name working on this thread
@@ -194,12 +244,12 @@ public class ClientHandler extends Thread implements Constants3 {
 	}
 
 	public boolean getPendingChallengeStatus() {
-		return pendingChallengeStatus;
+		return this.isPendingChallenge;
 	}
 
 
 	public void setPendingChallengeStatus(boolean pendingChallengeStatus) {
-		this.pendingChallengeStatus = pendingChallengeStatus;
+		this.isPendingChallenge = pendingChallengeStatus;
 	}
 	
 	// Wait for input
@@ -216,7 +266,7 @@ public class ClientHandler extends Thread implements Constants3 {
 
 
 	public boolean sentParsedMoveToGoGameServer(int xCo, int yCo) {
-		System.out.println("A (x,y) move has been registered by the client handler");
+		logger.log(Level.INFO,"A (x,y) move has been registered by the client handler");
 		this.sendMessageToClient("\nYour move is registered, checking validity...\n");
 		
 		// Misschien niet nodig
@@ -232,7 +282,7 @@ public class ClientHandler extends Thread implements Constants3 {
 	}
 	
 	public boolean sentParsedMoveToGoGameServer(String passMove) {
-		System.out.println("A passing move has been registered by the client handler");
+		logger.log(Level.INFO,"A passing move has been registered by the client handler");
 		this.sendMessageToClient("\nYour pass move is registered\n");
 		
 		// Toggle the boolean, die wordt opgevraagd door de human player player (blijft tot die tijd in een while loop hangen)
@@ -243,7 +293,7 @@ public class ClientHandler extends Thread implements Constants3 {
 	}
 	
 	public boolean sentParsedMoveToGoGameServer(int fieldIndex) {
-		System.out.println("A fieldIndex move has been registered by the client handler");
+		logger.log(Level.INFO,"A fieldIndex move has been registered by the client handler");
 		this.sendMessageToClient("\n Your fieldIndex move is registered \n");
 		
 		// Toggle the boolean, die wordt opgevraagd door de human player player (blijft tot die tijd in een while loop hangen)
@@ -312,5 +362,47 @@ public class ClientHandler extends Thread implements Constants3 {
 	}
 
 
+	public boolean getIsWaiting() {
+		return isWaiting;
+	}
+
+
+	public void setIsWaiting(boolean isWaiting) {
+		this.isWaiting = isWaiting;
+	}
+
+	public void setIsAlreadyChallenged(boolean isAlreadyChallenged) {
+		this.isAlreadyChallenged = isAlreadyChallenged;
+	}
 	
+	public boolean getIsAlreadyChallenged() {
+		return this.isAlreadyChallenged;
+	}
+
+	public boolean getIsPlaying() {
+		return isPlaying;
+	}
+
+
+	public void setIsPlaying(boolean isPlaying) {
+		this.isPlaying = isPlaying;
+	}
+
+
+	public boolean getIsInLobby() {
+		return inLobby;
+	}
+
+
+	public void setIsInLobby(boolean inLobby) {
+		this.inLobby = inLobby;
+	}
+	
+	public ClientHandler getClientHandlerOpponent() {
+		return this.clientHandlerOpponent;
+	}
+	
+	public void setClientHandlerOpponent(ClientHandler clientHandlerOpponent) {
+		this.clientHandlerOpponent = clientHandlerOpponent;
+	}
 }

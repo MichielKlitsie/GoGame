@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+import java.util.logging.*;
+import java.util.stream.Collectors;
 
 import go_game.Game;
 import go_game.HumanPlayer;
@@ -25,12 +27,18 @@ import go_game.Player;
 public class Server {
 	private static final String USAGE
 	= "usage: " + Server.class.getName() + " <port>";
+	
+	// Logging
+	public final static Logger LOGGER = Logger.getLogger(Server.class.getName());
 
 	// Main ----------------------------------------------------------------------------------
 	/** Start een Server-applicatie op. */
 	public static void main(String[] args) {
 		if (args.length != 1) {
 			System.out.println(USAGE);
+			LOGGER.setLevel(Level.INFO);
+			LOGGER.log(Level.INFO, USAGE);
+			
 			System.exit(0);
 		}
 
@@ -41,11 +49,12 @@ public class Server {
 
 	// Instance variables----------------------------------------------------------
 	private int port;
-	private List<ClientHandler> threads;
 	private ServerSocket ssock;
 	boolean nameIsTaken;
 	public HashMap<String, String> challengePartners = new HashMap<>();
-	public static ServerThreadObserver mServerThreadObserver; 
+	public static ServerThreadObserver mServerThreadObserver;
+	
+	private List<ClientHandler> clientHandlerThreads;
 
 	// Constructor ----------------------------------------------------------------
 	/** Constructs a new Server object. */
@@ -53,20 +62,23 @@ public class Server {
 		try {
 			// Set the port 
 			this.port = portArg;
-			threads = new ArrayList<ClientHandler>();
+			clientHandlerThreads = new ArrayList<ClientHandler>();
 			nameIsTaken = false;
 
 			// Create the socket
 			ssock = new ServerSocket(port);
-			System.out.println("ServerSocket created on \n - port: " + ssock.getLocalPort() + 
+			String serverString = "ServerSocket created on \n - port: " + ssock.getLocalPort() + 
 					"\n - Local Socket address: " + ssock.getLocalSocketAddress() +
-					"\n - Machines IP address: " + InetAddress.getLocalHost().getHostAddress());
+					"\n - Machines IP address: " + InetAddress.getLocalHost().getHostAddress();
 
+			LOGGER.log(Level.INFO, serverString);		
 			// Create the thread observer
 			mServerThreadObserver = new ServerThreadObserver(this);
 			
 		} catch (IOException e) {
-			System.out.println("ERROR: could not create a socket on port " + port);
+			String errorMessage = "ERROR: could not create a socket on port " + port;
+			System.out.println(errorMessage);
+			LOGGER.log(Level.SEVERE, errorMessage);
 		}
 	}
 
@@ -82,7 +94,9 @@ public class Server {
 			while(true) {
 				// Accept a new client and start a new thread
 				nameIsTaken = false;
-				System.out.println("\n Waiting for new client to connect...");
+				String waitingMessage = "\n Waiting for new client to connect...";
+				
+				LOGGER.log(Level.INFO, waitingMessage);
 				Socket sock = ssock.accept();
 				//				System.out.println("Cliented connected, starting handler...");
 				// Retrieve clients name
@@ -93,11 +107,11 @@ public class Server {
 				mServerThreadObserver.addClientHandlerThread(mClientHandler);
 
 				// Look if name already exists before adding to the list
-				Iterator<ClientHandler> threadsIterator = threads.iterator();
+				Iterator<ClientHandler> threadsIterator = clientHandlerThreads.iterator();
 				while (threadsIterator.hasNext()) {
 					ClientHandler currentThread = threadsIterator.next();
 					if (currentThread.getClientName().equals(mClientHandler.getClientName())) {
-						System.out.println("Name already exists. Appended with 'Two'");	
+						LOGGER.log(Level.INFO,"Name already exists. Appended with 'Two'");	
 						nameIsTaken = true;
 					}
 				}
@@ -129,10 +143,10 @@ public class Server {
 	 * @param msg message that is send
 	 */
 	public void broadcast(String msg) {
-		synchronized(threads) {
-			System.out.println("Broadcasted to all clients: " + msg);
+		synchronized(clientHandlerThreads) {
+			LOGGER.log(Level.INFO,"Broadcasted to all clients: " + msg);
 			// Loop through threads-list and send the message
-			Iterator<ClientHandler> threadsIterator = threads.iterator();
+			Iterator<ClientHandler> threadsIterator = clientHandlerThreads.iterator();
 			while (threadsIterator.hasNext()) {
 				ClientHandler currentThread = threadsIterator.next();
 				currentThread.sendMessageToClient(msg);
@@ -145,8 +159,8 @@ public class Server {
 	 * @param handler ClientHandler that will be added
 	 */
 	public void addHandler(ClientHandler handler) {
-		synchronized(threads) {
-			threads.add(handler);
+		synchronized(clientHandlerThreads) {
+			clientHandlerThreads.add(handler);
 		}
 	}
 
@@ -155,8 +169,8 @@ public class Server {
 	 * @param handler ClientHandler that will be removed
 	 */
 	public void removeHandler(ClientHandler handler) {
-		synchronized(threads) {
-			threads.remove(handler);
+		synchronized(clientHandlerThreads) {
+			clientHandlerThreads.remove(handler);
 		}
 	}
 	
@@ -166,7 +180,7 @@ public class Server {
 	public GoGameServer startGameThread(String nameChallenger, String nameChallenged, int boardDim, String strMarkChallenger,  
 			//BufferedReader inChallenged, BufferedWriter outChallenged, BufferedReader inChallenger, BufferedWriter outChallenger) {
 			ClientHandler clientHandlerP1, ClientHandler clientHandlerP2) {
-		System.out.println("Starting a game...");
+		LOGGER.log(Level.INFO,"Starting a game...");
 
 		// If the computer is played, the clientHandler1 == clientHandler2
 		GoGameServer goGameServer = new GoGameServer(nameChallenger, nameChallenged, boardDim, strMarkChallenger, 
@@ -184,8 +198,8 @@ public class Server {
 	}
 	
 	// GETTERS AND SETTERS ---------------------------------------------------------------
-	public List<ClientHandler> getPlayers() {
-		return threads;
+	public List<ClientHandler> getAllPlayers() {
+		return clientHandlerThreads;
 	}
 	
 
@@ -196,4 +210,26 @@ public class Server {
 	public void addChallengePartners(String nameChallenger, String nameToBeChallenged) {
 		this.challengePartners.put(nameToBeChallenged, nameChallenger);
 	}
+	
+	// GET PEOPLE IN LOBBY
+	public List<ClientHandler> getPlayersInLobby() {
+		List<ClientHandler> allPlayers = getAllPlayers();
+		List<ClientHandler> clientHandlerThreadsInLobby = allPlayers.stream()
+				.filter(p -> p.getIsInLobby())
+				.collect(Collectors.toList());
+		
+		return clientHandlerThreadsInLobby;
+	}
+	
+	// GET PEOPLE PLAYING
+	public List<ClientHandler> getPlayersPlaying() {
+		List<ClientHandler> allPlayers = getAllPlayers();
+		List<ClientHandler> clientHandlerThreadsIsPlaying = allPlayers.stream()
+				.filter(p -> p.getIsPlaying())
+				.collect(Collectors.toList());
+		
+		return clientHandlerThreadsIsPlaying;
+	}
+	
+	
 }
