@@ -49,7 +49,7 @@ public class ServerThreadObserver extends Thread {
 	
 	// When server closes, close all threads
 	public void shutDownAllThreads() {
-		// TODO: Implements general shutdown
+		// TODO: SHUTDOWN: Implements general shutdown
 	}
 	
 }

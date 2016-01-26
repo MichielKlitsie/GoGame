@@ -28,15 +28,16 @@ public class NetworkIOParser implements Constants3 {
 	private boolean isPendingChallenge;
 	private boolean isWaitingOnMove;
 	private boolean isAlreadyChallenged;
+	private boolean isObserving;
 	// PREMADE STRINGS
 	private String pendingChallengeMessage = "You are waiting on a challenge response, do not try to do anything crazy.\n";
-	
+
 
 	// ADDITIONAL COMMANDS
 	private static final String GETSTATUS = "GETSTATUS";
 	private static final String CLIENTEXIT = "CLIENTEXIT";
 	private static final String EXIT = "EXIT";
-	
+
 	// Constructor ----------------------------
 	/**
 	 * Constructor.
@@ -71,6 +72,7 @@ public class NetworkIOParser implements Constants3 {
 		this.isPendingChallenge = clientHandler.getPendingChallengeStatus();
 		this.isWaitingOnMove = clientHandler.getIsWaiting();
 		this.isAlreadyChallenged = clientHandler.getIsAlreadyChallenged();
+		this.isObserving = clientHandler.getIsObserving();
 
 		// Perform switch case...
 		switch (command) {
@@ -117,6 +119,8 @@ public class NetworkIOParser implements Constants3 {
 				clientHandler.sendMessageToClient(clientHandler.getOptionsGame());
 			} else if (this.isWaitingOnMove) {
 				clientHandler.sendMessageToClient(clientHandler.getOptionsWaitingOnMove());
+			} else if (this.isObserving) {
+				clientHandler.sendMessageToClient(clientHandler.getOptionsObserving());
 			} else {
 				clientHandler.sendMessageToClient("Your current state is unclear... Sorry!");
 			}
@@ -215,7 +219,6 @@ public class NetworkIOParser implements Constants3 {
 
 				// INPUT IS ONE ARGUMENT
 				if (amountArgs == 1) {
-					//TODO: GETTING THE PASS COMMAND RIGHT
 					String singleInputArg = stringParts[1].trim();
 
 					if (singleInputArg.equalsIgnoreCase("pass")) {
@@ -286,8 +289,8 @@ public class NetworkIOParser implements Constants3 {
 				clientHandler.sendMessageToServer(MOVE + DELIMITER + PASS);
 				break;
 			}
-		
-		// TODO: BOARD SENDING....	
+
+			// TODO: BOARD SENDING....	
 		case GETBOARD: 
 			if (this.isPendingChallenge || this.isInLobby) {
 				clientHandler.sendMessageToServer(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
@@ -312,7 +315,7 @@ public class NetworkIOParser implements Constants3 {
 				clientHandler.setPendingChallengeStatus(false);
 				clientHandler.setIsInLobby(true);
 				clientHandler.sendMessageToClient("Challenge is retracted.\n");
-				
+
 				// Sent the message to the person challenged
 				HashMap<String, String> challengePartners = server.getChallengePartners();
 				nameChallenger = clientHandler.getClientName().trim();
@@ -335,7 +338,7 @@ public class NetworkIOParser implements Constants3 {
 							break outerloop;
 						}
 					}
-				
+
 				// And remove the challenge partners
 				challengePartners.remove(nameChallenged);
 
@@ -344,6 +347,11 @@ public class NetworkIOParser implements Constants3 {
 				clientHandler.sendMessageToClient("Exiting lobby...");
 				clientHandler.shutdown();
 				break;
+			} else if (this.isObserving) {
+				clientHandler.setIsObserving(false);
+				clientHandler.setObserverModeOff();
+				clientHandler.sendMessageToClient("You stopped observing the game\n");
+				clientHandler.setIsInLobby(true);
 			} else if (this.isPlaying) {
 				// Step 1: PERSON SENDING QUIT
 				clientHandler.sendMessageToClient("Quiting game...");
@@ -427,7 +435,7 @@ public class NetworkIOParser implements Constants3 {
 									clientHandler.setIsInLobby(false);
 
 									// TO BE CHALLENGED SIDE
-//									temp.sendMessageToClient(YOURECHALLENGED + DELIMITER + nameChallenger);
+									//									temp.sendMessageToClient(YOURECHALLENGED + DELIMITER + nameChallenger);
 									temp.sendMessageToClient("You are challenged by '" + nameChallenger + "', respond with '" + CHALLENGEACCEPTED + "' or '" + CHALLENGEDENIED + "'.");
 									temp.setIsAlreadyChallenged(true);
 									challengerAvailable = true;
@@ -460,7 +468,7 @@ public class NetworkIOParser implements Constants3 {
 				clientHandler.sendMessageToServer(FAILURE + DELIMITER + ARGUMENTSMISSING);				
 			} else if (amountArgs == 1) {
 				String waitMessage = "\nWaiting for a response from " + stringParts[1].trim() + " or type 'QUIT' to withdraw...\n"; 
-//				System.out.println(waitMessage);
+				//				System.out.println(waitMessage);
 				clientHandler.sendMessageToClient(waitMessage);
 
 
@@ -510,7 +518,7 @@ public class NetworkIOParser implements Constants3 {
 					System.out.println("Oh jeahhhhh");
 					String nameChallenger = clientHandler.getClientName().trim(); 
 					String gameArgs = nameChallenger + DELIMITER + BOARDSIZE + DELIMITER + BLACK; 
-//					clientHandler.sendMessageToClient(GAMESTART + DELIMITER + gameArgs);
+					//					clientHandler.sendMessageToClient(GAMESTART + DELIMITER + gameArgs);
 					//
 				} else {
 					// THIS IS WHAT ACTUALLY HAPPENS 
@@ -533,18 +541,19 @@ public class NetworkIOParser implements Constants3 {
 
 								// BROADCAST TO PEOPLE IN LOBBY TWO PLAYERS ARE LEAVING LOBBY TO PLAY A GAME
 								server.broadcast("\n[" + nameChallenger + " and " + nameChallenged + " are leaving the lobby to play a game]\n");
-//								clientHandler.setIsPlaying(true);
-//								clientHandler.setIsInLobby(false);
+								//								clientHandler.setIsPlaying(true);
+								//								clientHandler.setIsInLobby(false);
 
 								// GAMESTART PERSON CHALLENGED
-//								System.out.println(clientHandler.getClientName() + ": Challenge status - " + this.isPendingChallenge);
+								//								System.out.println(clientHandler.getClientName() + ": Challenge status - " + this.isPendingChallenge);
 								String gameArgs = nameChallenged + DELIMITER + BOARDSIZE + DELIMITER + WHITE; 
 								clientHandler.sendMessageToClient(GAMESTART + DELIMITER + gameArgs);
 
 								// GAMESTART CHALLENGER
-//								System.out.println(temp.getClientName() + ": Challenge status" + temp.getPendingChallengeStatus());
+								//								System.out.println(temp.getClientName() + ": Challenge status" + temp.getPendingChallengeStatus());
 								String gameArgs2 = nameChallenger + DELIMITER + BOARDSIZE + DELIMITER + BLACK; 
 								temp.sendMessageToClient(GAMESTART + DELIMITER + gameArgs2);
+								temp.setPendingChallengeStatus(false);
 
 								// GAMESTART TO SERVER FROM THE PERSON CHALLENGED
 								clientHandler.sendMessageToServer(GAMESTART + DELIMITER + gameArgs);
@@ -606,9 +615,41 @@ public class NetworkIOParser implements Constants3 {
 			// ---------------------------------------------------------------
 
 		case OBSERVER: 
-			// TODO: GET THE OBSERVER STATUS RIGHT
-			d = 1; break; //OBSERVER";
-		case NOGAMESPLAYING: d = 1; break; //NOGAMESPLAYING";
+			if (isInLobby && !isAlreadyChallenged && !isPendingChallenge) {
+			if (amountArgs == 0) {
+				clientHandler.sendMessageToServer(CURRENTGAMES);
+			} else if (amountArgs == 1) {
+				String namePlayer = stringParts[1].trim();
+				// TODO: GET THE OBSERVER STATUS RIGHT
+				// Get the clientHandler of the namePlayer (if it exists)
+				if (searchClientHandlerByNameExists(namePlayer)) {
+					// And check if the player is currently playing a game
+					ClientHandler observedPlayer = searchClientHandlerByName(namePlayer);
+							if (observedPlayer.getIsPlaying()) {
+								String messageObserveGame = OBSERVEDGAME + DELIMITER + WHITE + DELIMITER + "blaWhite" + DELIMITER + BLACK + DELIMITER + "blaBlack " + DELIMITER + "Board size: "+ BOARDSIZE + DELIMITER + "Board: \n";
+								clientHandler.sendMessageToClient(messageObserveGame);
+								clientHandler.sendMessageToClient("Observering game of " + namePlayer);
+								clientHandler.setIsObserving(true);
+								clientHandler.setIsInLobby(false);
+								clientHandler.setObserverModeOn(observedPlayer);
+							} else {
+								clientHandler.sendMessageToClient(namePlayer + " is not playing a game");
+							}
+				} else {
+					clientHandler.sendMessageToClient("The player does not exist");
+				}
+				
+			} else if (amountArgs > 1) {
+				clientHandler.sendMessageToServer(ARGUMENTSMISSING);
+			}; 
+			} else {
+				clientHandler.sendMessageToServer(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
+			}
+			break; 
+		case NOGAMESPLAYING: 
+			String strNobodyPlaying = "No games are currently played.\n";
+			clientHandler.sendMessageToClient(strNobodyPlaying);
+			break; 
 		case CURRENTGAMES: 
 			if (this.isPlaying) {
 				clientHandler.sendMessageToServer(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
@@ -617,7 +658,7 @@ public class NetworkIOParser implements Constants3 {
 				List<ClientHandler> listOfPlayersPlaying = getListOfPlayersPlaying();
 				String strListPlaying = "";
 				if (listOfPlayersPlaying.size() == 0) {
-					strListPlaying = "No games are currently played.\n";
+					clientHandler.sendMessageToServer(NOGAMESPLAYING);
 				} else {
 					strListPlaying = createStringOfListPlayers(listOfPlayersPlaying);
 				}
@@ -686,10 +727,11 @@ public class NetworkIOParser implements Constants3 {
 		case GETSTATUS:
 			String statusString = "Current status:" + 
 					"\nIn the lobby: " + isInLobby +
-				"\nSent a challenge: " + isPendingChallenge +
-				"\nRecieved a challenge: " + isAlreadyChallenged + 
-				"\nPlaying a game: " + isPlaying +
-				"\nWaiting for opponent: " + isWaitingOnMove + "\n";
+					"\nSent a challenge: " + isPendingChallenge +
+					"\nRecieved a challenge: " + isAlreadyChallenged + 
+					"\nPlaying a game: " + isPlaying +
+					"\nWaiting for opponent: " + isWaitingOnMove + 
+					"\nObserving: " + isObserving + "\n";
 			clientHandler.sendMessageToClient(statusString);
 			break;
 			// REMOVING THREAD
@@ -714,6 +756,35 @@ public class NetworkIOParser implements Constants3 {
 		}
 		return outputCommand;
 
+	}
+
+	// Search for clientHandler by name
+	private ClientHandler searchClientHandlerByName(String namePlayer) {
+		List<ClientHandler> availablePlayers = this.server.getAllPlayers();
+		ClientHandler playerTemp = null; // We can do this, because it is already checked that the player exists!
+		nameloop:
+		for (ClientHandler temp : availablePlayers) {
+			// temp is the challenger
+			if(temp.getClientName().trim().equals(namePlayer)) {
+				playerTemp = temp;
+				break nameloop;
+			}
+		}
+		return playerTemp;
+	}
+	
+	private boolean searchClientHandlerByNameExists(String namePlayer) {
+		boolean playerExists = false;
+		List<ClientHandler> availablePlayers = this.server.getAllPlayers();
+		namesearchloop:
+		for (ClientHandler temp : availablePlayers) {
+			// temp is the challenger
+			if(temp.getClientName().trim().equals(namePlayer)) {
+				playerExists = true;
+				break namesearchloop;
+			}
+		}
+		return playerExists;
 	}
 
 	// ---------------------------------------------------------------

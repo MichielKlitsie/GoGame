@@ -125,35 +125,15 @@ public class Client extends Thread implements Constants2 {
 
 			while (true) {
 				if ((charsRead = in.read(inputChars)) != -1) {
-//					System.out.println("Received message: ");
 					String temp = new String(inputChars).substring(0, charsRead);
 					System.out.println(temp);
 					System.out.flush();
 					if (temp.equalsIgnoreCase("exit")) {
 						System.out.println(": System shutting down");
-						// TODO: Write shutdown functionality in seperate observer class
+						// TODO: SHUTDOWN: Write shutdown functionality in seperate observer class
 						shutdown();
 						return;
 					}
-					
-//					// When the challenge command is send, wait on the blocking call of readline
-//					if (temp.equals(WAITFOROPPONENT)) {
-//						String answerCommand = in.readLine();
-//						if (answerCommand.equals(CHALLENGEACCEPTED)) {
-//							System.out.println("THE GAME CAN COMMENCE!!!");
-//							// START THE GAME
-//							System.out.println("\n 3... \n");
-//							System.out.println("\n 2... \n");
-//							System.out.println("\n 1... \n");
-//							
-//						} else if (answerCommand.equals(CHALLENGEDENIED)) {
-//							System.out.println("Unfortunately, he/she doesn't want to play with you... Try again!");
-//						} else if (answerCommand.equals("q")) {
-//							System.out.println("Challenge is withdrawn");
-//						} else {
-//							System.out.println("Challenge is withdrawn for unknown reasons");
-//						}
-//					}
 				}
 			} 
 		} catch (IOException e) {

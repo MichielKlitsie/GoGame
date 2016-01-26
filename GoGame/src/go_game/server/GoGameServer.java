@@ -3,6 +3,10 @@ package go_game.server;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 import go_game.ComputerPlayer;
 //import go_game.ClientHandler;
@@ -14,7 +18,7 @@ import go_game.RandomStrategy;
 import go_game.Strategy;
 import go_game.protocol.Constants3;
 
-public class GoGameServer extends Thread implements Constants3 {
+public class GoGameServer extends Thread implements Constants3, Observer {
 
 	// Instance variables
 	private Player p1;
@@ -24,14 +28,13 @@ public class GoGameServer extends Thread implements Constants3 {
 	private int dim;
 	
 	// IO streams
-//	private BufferedReader inChallenger;
-//	private BufferedReader inChallenged;
-//	private BufferedWriter outChallenger;
-//	private BufferedWriter outChallenged;
 	private ClientHandler clientHandlerP1;
 	private ClientHandler clientHandlerP2;
 	private Game game;
 	public boolean moveHasBeenMade;
+	
+	// Observers
+	private List<ClientHandler> observers = new ArrayList<ClientHandler>();
 
 	// Constructor
 	public GoGameServer(String nameChallenger, String nameChallenged, int boardDim, String strMarkChallenger,
@@ -70,18 +73,17 @@ public class GoGameServer extends Thread implements Constants3 {
 		
 	}
 
-	// <-------------------------------------------------------------------------------
-	// <---- HIER GEBLEVEN ------------------------------------------------------------
-	// <-------------------------------------------------------------------------------
-	
 	public void run() {	
 		// Check input
 		this.game = new Game(p1, p2, dim);//, clientHandlerP1, clientHandlerP2);
 		
+		// Set the GoGameServer as the observer
+		this.game.addObserver(this);
+		
 		// Working on same thread as this GoGameServer
 		game.start();
 		
-		String helloBoard = "New board (or 'Goban') of dimensions " + dim + " X " +  dim + " created...";
+		String helloBoard = "\nNew board (or 'Goban') of dimensions " + dim + " X " +  dim + " created...\n";
 		sendMessageBoth(helloBoard);
 	}
 	
@@ -90,55 +92,39 @@ public class GoGameServer extends Thread implements Constants3 {
 		clientHandlerP2.sendMessageToClient(msg);
 	}
 	
-//	public boolean ParseMove(int xCo, int yCo) {
-//		// Let the GoGameServer ask the game if the move is valid
-////		boolean validMove = game.checkLegalMove(xCo, yCo);
-////		return validMove;
-//		this.moveHasBeenMade = true;
-//		return this.moveHasBeenMade;
-//	}
-	
-	
+	public void sendMessageToObservers(String msg) {
+		System.out.println("Amount observers sent: " + observers.size() +"\n");
+		if (observers.size() > 0) {
+			for (ClientHandler currentObserver : observers) {
+				currentObserver.sendMessageToClient(msg);
+			}
+		}
 
+	}
 	
-//	/**
-//	 * This method can be used to send a message over the socket
-//	 * connection to the Client. If the writing of a message fails,
-//	 * the method concludes that the socket connection has been lost
-//	 * and shutdown() is called.
-//	 */
-//	public void sendMessageP1(String msg) {
-//		// TODO insert body
-//		
-//		try {
-//			outChallenger.write(msg);
-//			outChallenger.flush();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-////			shutdown();
-//		}
-//	}
-//	
-//	/**
-//	 * This method can be used to send a message over the socket
-//	 * connection to the Client. If the writing of a message fails,
-//	 * the method concludes that the socket connection has been lost
-//	 * and shutdown() is called.
-//	 */
-//	public void sendMessageP2(String msg) {
-//		// TODO insert body		
-//		try {
-//			outChallenged.write(msg);
-//			outChallenged.flush();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-////			shutdown();
-//		}
-//	}
-//	
-//	// GETTERS AND SETTERS -----------------------------------
+	// GETTERS AND SETTERS -----------------------------------
 	public Game getCurrentGame() {
 		return this.game;
+	}
+	
+	public void addObserver(ClientHandler observer) {
+		observers.add(observer);
+	}
+	
+	public void removeObserver(ClientHandler observer) {
+		observers.remove(observer);
+	}
+	
+	public List<ClientHandler> getObservers() {
+		return this.observers;
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+
+		String stringBoard = "Update of board: \n" + arg;
+		sendMessageToObservers(stringBoard);
+		
 	}
 
 }

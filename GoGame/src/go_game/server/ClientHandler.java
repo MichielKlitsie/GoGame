@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import go_game.Board;
+import go_game.Game;
 import go_game.Mark;
 import go_game.protocol.Constants2;
 import go_game.protocol.Constants3;
@@ -41,6 +42,7 @@ public class ClientHandler extends Thread implements Constants3 {
 	private boolean isPlaying;
 	private boolean inLobby;
 	private boolean isAlreadyChallenged;
+	private boolean isObserving;
 	
 
 	// Keep track of making a move
@@ -73,6 +75,12 @@ public class ClientHandler extends Thread implements Constants3 {
 	private String optionsMenuWaitingOnMove = "\nOptions menu waiting on move:\n" +
 			"5. CHAT: Send a message to the opponent players.\n" +
 			"x. GETOPTIONS: Get this options menu.\n";
+	private String optionsMenuObserving = "\nOptions menu observing:\n" +
+			"5. CHAT: Send a message to the playing players.\n" +
+			"x. GETOPTIONS: Get this options menu.\n";
+	
+	// OBSERVER 
+	private GoGameServer observeGoGameServer;
 
 	// Constructor ----------------------------------------------------------------
 
@@ -98,6 +106,7 @@ public class ClientHandler extends Thread implements Constants3 {
 		setIsPlaying(false);
 		setIsWaiting(false);
 		setIsAlreadyChallenged(false);
+		setIsObserving(false);
 	}
 
 
@@ -212,46 +221,12 @@ public class ClientHandler extends Thread implements Constants3 {
 		this.goGameServer = server.startGameThread(nameChallenger, nameChallenged, boardDim, strMarkChallenger, 
 				 //inChallenged,  outChallenged,  inChallenger, outChallenger);
 				clientHandlerChallenger, this);
-	}
-
-	// GETTERS AND SETTERS ------------------------------------------------
-	public String getOptionsLobby() {
-		return this.optionsMenuLobby;
-	}
-	
-	public String getOptionsGame() {
-		return this.optionsMenuPlaying;
-	}
-
-	public String getOptionsPendingChallenge() {
-		return this.optionsMenuPendingChallenge;
-	}
-
-	public String getOptionsWaitingOnMove() {
-		return this.optionsMenuWaitingOnMove;
-	}
-
-	/**
-	 * This method will return the client name working on this thread
-	 */
-	
-	public String getClientName() {
-		return clientName;
-	}
-	
-	public void setClientName(String newName) {
-		this.clientName = newName;
-	}
-
-	public boolean getPendingChallengeStatus() {
-		return this.isPendingChallenge;
+		
+		// Let the other clientHandler get the same reference to the game server
+		clientHandlerChallenger.setCurrentGameServer(this.goGameServer);
 	}
 
 
-	public void setPendingChallengeStatus(boolean pendingChallengeStatus) {
-		this.isPendingChallenge = pendingChallengeStatus;
-	}
-	
 	// Wait for input
 	public void waitForInput() {
 		Scanner line = new Scanner(in);
@@ -264,13 +239,10 @@ public class ClientHandler extends Thread implements Constants3 {
 		//return input;
 	}
 
-
+	// SENT MOVE COMMANDS
 	public boolean sentParsedMoveToGoGameServer(int xCo, int yCo) {
 		logger.log(Level.INFO,"A (x,y) move has been registered by the client handler");
 		this.sendMessageToClient("\nYour move is registered, checking validity...\n");
-		
-		// Misschien niet nodig
-//		goGameServer.ParseMove(xCo, yCo);
 		
 		this.lastMove[0] = xCo;
 		this.lastMove[1] = yCo;
@@ -305,6 +277,72 @@ public class ClientHandler extends Thread implements Constants3 {
 		return this.moveHasBeenMade;
 	}
 	
+	// OBSERVER MODE ------------------------------------------------------------
+	public void setObserverModeOn(ClientHandler clientHandlerToObserve) {
+		// Get the game of the server
+		ClientHandler clientHandlerObserved = clientHandlerToObserve;
+		this.observeGoGameServer = clientHandlerToObserve.getCurrentGameServer();
+		Game observeGame = observeGoGameServer.getCurrentGame();
+		observeGoGameServer.addObserver(this);
+		sendMessageToClient(observeGame.getCurrentBoard().toString());
+	}
+	
+	public void setObserverModeOff() {
+		this.observeGoGameServer.removeObserver(this);
+		
+	}
+	
+	public GoGameServer getCurrentGameServer() {
+		return this.goGameServer;
+	}
+	
+	public void setCurrentGameServer(GoGameServer goGameServer) {
+		this.goGameServer = goGameServer;
+	}
+	
+	
+	// GETTERS AND SETTERS ------------------------------------------------
+	public String getOptionsLobby() {
+		return this.optionsMenuLobby;
+	}
+	
+	public String getOptionsGame() {
+		return this.optionsMenuPlaying;
+	}
+
+	public String getOptionsPendingChallenge() {
+		return this.optionsMenuPendingChallenge;
+	}
+
+	public String getOptionsWaitingOnMove() {
+		return this.optionsMenuWaitingOnMove;
+	}
+	
+	public String getOptionsObserving() {
+		return this.optionsMenuObserving;
+	}
+
+	/**
+	 * This method will return the client name working on this thread
+	 */
+	
+	public String getClientName() {
+		return clientName;
+	}
+	
+	public void setClientName(String newName) {
+		this.clientName = newName;
+	}
+
+	public boolean getPendingChallengeStatus() {
+		return this.isPendingChallenge;
+	}
+
+
+	public void setPendingChallengeStatus(boolean pendingChallengeStatus) {
+		this.isPendingChallenge = pendingChallengeStatus;
+	}
+	
 	public void setIndexMoveMade(boolean indexMoveMade) {
 		this.indexMoveMade = indexMoveMade;	
 	}
@@ -326,7 +364,6 @@ public class ClientHandler extends Thread implements Constants3 {
 	}
 	
 	public int getLastIndexMove() {
-		// TODO Auto-generated method stub
 		return this.lastIndexMove;
 	}
 	
@@ -404,5 +441,13 @@ public class ClientHandler extends Thread implements Constants3 {
 	
 	public void setClientHandlerOpponent(ClientHandler clientHandlerOpponent) {
 		this.clientHandlerOpponent = clientHandlerOpponent;
+	}
+	
+	public void setIsObserving(boolean isObserving) {
+		this.isObserving = isObserving;
+	}
+	
+	public boolean getIsObserving() {
+		return this.isObserving;
 	}
 }

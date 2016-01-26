@@ -3,6 +3,7 @@ package go_game;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.util.Map;
+import java.util.Observable;
 import java.util.Scanner;
 
 import go_game.protocol.Constants3;
@@ -14,7 +15,7 @@ import go_game.server.ClientHandler;
  * @author Michiel Klitsie
  * @version $Revision: 1.1 $
  */
-public class Game implements Constants3 {
+public class Game extends Observable implements Constants3 {
 
 	// -- Instance variables -----------------------------------------
 
@@ -22,8 +23,8 @@ public class Game implements Constants3 {
 
 	// Scanner for input line, to be used accross all classes
 //	public static final Scanner line = new Scanner(System.in);
-	private ClientHandler clientHandlerP1;
-	private ClientHandler clientHandlerP2;
+//	private ClientHandler clientHandlerP1;
+//	private ClientHandler clientHandlerP2;
 
 	/*@
        private invariant board != null;
@@ -50,12 +51,7 @@ public class Game implements Constants3 {
 	 */
 	private int current;
 	boolean previousTurnPassed;
-	boolean isGameOver;
-
-//	private ClientHandler clientHandlerCurrentPlayer;
-//	private ClientHandler clientHandlerWaitingPlayer;
-
-	
+	boolean isGameOver;	
 
 	// -- Constructors -----------------------------------------------
 
@@ -86,12 +82,7 @@ public class Game implements Constants3 {
 		isGameOver = false;
 		
 		// Set the clienthandlers
-//		this.clientHandlerP1 = clientHandlerP1;
-//		HumanPlayer p1 = (HumanPlayer) s0;
-//		this.clientHandlerP1 = p1.getClientHandler();
-//		this.clientHandlerP2 = clientHandlerP2;		
-//		clientHandlerCurrentPlayer = clientHandlerP1;
-//		clientHandlerWaitingPlayer = clientHandlerP2;
+		
 
 		// <-------------------------------------------------------------------------------
 		// <---- HIER GEBLEVEN ------------------------------------------------------------
@@ -162,7 +153,7 @@ public class Game implements Constants3 {
 	 */
 	private void play() {
 		// Show the first empty board
-		this.update();
+		this.gameUpdate();
 
 		// Loop through the moves, the actual game
 		//    	while (!this.board.gameOver()) {
@@ -199,7 +190,7 @@ public class Game implements Constants3 {
 			}
 
 			// Step 4: Update the screen
-			this.update();	
+			this.gameUpdate();	
 
 			// Step 5: Switch players for next turn
 			this.current = (current + 1) % 2;
@@ -212,12 +203,18 @@ public class Game implements Constants3 {
 	/**
 	 * Prints the game situation.
 	 */
-	private void update() {
+	private void gameUpdate() {
 		String strBoardMessage = "\n Current game situation: \n\n" + board.toString()
 		+ "\n";
-		System.out.println(strBoardMessage);
+//		System.out.println(strBoardMessage);
 		sendMessageToBoth(strBoardMessage);
 		
+		// Sent to possible observers
+		setChanged();
+		// TODO: GET THE NOTIFY OBSERVERS RIGHT
+	    notifyObservers(strBoardMessage);
+//	    System.out.println("Kom ik hier?");
+//		sendMessageToObservers(strBoardMessage);
 	}
 	
 	/*@
@@ -246,11 +243,12 @@ public class Game implements Constants3 {
 		String scoreString = "\nThe final score is: Black " + scoreBlack + " vs. White " + scoreWhite + "\n"; 
 		System.out.println(scoreString);
 		sendMessageToBoth(scoreString);
+		notifyObservers(scoreString);
 		
 	}
 
 	private void printRules() {
-		// TODO: Misschien handig om te implementeren
+		// TODO: PRINT RULES: Misschien handig om te implementeren
 	}
 
 

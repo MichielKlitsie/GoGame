@@ -48,5 +48,9 @@ public class ComputerPlayer extends Player {
 		// OR PARSE FUNCTIONALITY OF MESSAGE
 		
 	}
+	
+	public Strategy getStrategy() {
+		return this.strategy;
+	}
 
 }
