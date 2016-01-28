@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -18,19 +19,20 @@ import go_game.Game;
 import go_game.HumanPlayer;
 import go_game.Mark;
 import go_game.Player;
+import go_game.protocol.Constants4;
 
 /**
  * Server. 
  * @author  Michiel Klitsie
  * @version $Revision: 1.1 $
  */
-public class Server {
+public class Server extends Thread implements Constants4 {
 	private static final String USAGE
 	= "usage: " + Server.class.getName() + " <port>";
 
 	// Logging
 	public final static Logger LOGGER = Logger.getLogger(Server.class.getName());
-
+	public static Server server;
 	// Main ----------------------------------------------------------------------------------
 	/** Start een Server-applicatie op. */
 	public static void main(String[] args) {
@@ -42,19 +44,38 @@ public class Server {
 			System.exit(0);
 		}
 
-		Server server = new Server(Integer.parseInt(args[0]));
-		server.run();
+
+
+		server = new Server(Integer.parseInt(args[0]));
+		//		server.run();
+
+		// Add shutdown hook
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
+			public void run() {
+				// Nu kan ik bij de client
+				System.out.println("Server not nicely closed...");
+				//							Client.client.sendMessage("QUIT");
+				//						Client.client.interrupt();
+				Server.server.broadcast(QUIT);
+			}
+		});
+
+		server.setName("Main serverthread");
+		server.start();
 
 	}
 
 	// Instance variables----------------------------------------------------------
 	private int port;
 	private ServerSocket ssock;
-	boolean nameIsTaken;
+	//	boolean nameIsTaken;
 	public HashMap<String, String> challengePartners = new HashMap<>();
 	public static ServerThreadObserver mServerThreadObserver;
 
 	private List<ClientHandler> clientHandlerThreads;
+
+	private List<String> invalidNames = Arrays.asList("Hitler", "Wout", "Joris");
 
 	// Constructor ----------------------------------------------------------------
 	/** Constructs a new Server object. */
@@ -63,10 +84,10 @@ public class Server {
 			// Set the port 
 			this.port = portArg;
 			clientHandlerThreads = new ArrayList<ClientHandler>();
-			nameIsTaken = false;
+			//			nameIsTaken = false;
 
 			// Create the socket
-			ssock = new ServerSocket(port);
+			this.ssock = createServerSocket(portArg);
 			String serverString = "ServerSocket created on \n - port: " + ssock.getLocalPort() + 
 					"\n - Local Socket address: " + ssock.getLocalSocketAddress() +
 					"\n - Machines IP address: " + InetAddress.getLocalHost().getHostAddress();
@@ -74,12 +95,22 @@ public class Server {
 			LOGGER.log(Level.INFO, serverString);		
 			// Create the thread observer
 			mServerThreadObserver = new ServerThreadObserver(this);
+			mServerThreadObserver.start();
 
 		} catch (IOException e) {
 			String errorMessage = "ERROR: could not create a socket on port " + port;
 			System.out.println(errorMessage);
 			LOGGER.log(Level.SEVERE, errorMessage);
 		}
+	}
+
+	protected ServerSocket createServerSocket(int portArg) throws IOException {
+		ServerSocket serversock = new ServerSocket(port);
+		return serversock;
+	}
+
+	public ServerSocket getServerSocket(){
+		return this.ssock;
 	}
 
 	// Run ----------------------------------------------------------------------------------
@@ -93,7 +124,7 @@ public class Server {
 		try {
 			while(true) {
 				// Accept a new client and start a new thread
-//				nameIsTaken = false;
+				//				nameIsTaken = false;
 				String waitingMessage = "\n Waiting for new client to connect...";
 
 				LOGGER.log(Level.INFO, waitingMessage);
@@ -104,13 +135,13 @@ public class Server {
 				ClientHandler mClientHandler = new ClientHandler(this, sock);
 
 				// Add the thread to the observer
-				mServerThreadObserver.addClientHandlerThread(mClientHandler);
+				//				mServerThreadObserver.addClientHandlerThread(mClientHandler);
 
 				// Look if name already exists before adding to the list
-				mClientHandler = checkDoubleName(mClientHandler);
+				//				mClientHandler = checkDoubleName(mClientHandler);
 
 				addHandler(mClientHandler);
-				mClientHandler.announce();
+				//				mClientHandler.announce();
 				mClientHandler.start();
 
 			}
@@ -122,38 +153,48 @@ public class Server {
 
 	}
 
-	public ClientHandler checkDoubleName(ClientHandler mClientHandler) {
-		// Assume name is taken
-		nameIsTaken = true;
-		int i = 1;
-		String newName = mClientHandler.getClientName().trim();
-		// Get ready for looping and appending with i
-		nameloop:
-		while(nameIsTaken) {
+	public boolean checkDoubleName(String name) {
+		boolean nameIsTaken;
+		List<ClientHandler> listDoubleNames = getPlayersInLobby().stream().filter(p -> name.equals(p.getClientName().trim())).collect(Collectors.toList());
+		if (listDoubleNames.size() == 0) {
 			nameIsTaken = false;
-			// Cycle through current clientHandlers
-			Iterator<ClientHandler> threadsIterator = clientHandlerThreads.iterator();
-			innernameloop:
-			while (threadsIterator.hasNext()) {
-				ClientHandler currentThread = threadsIterator.next();
-				if (currentThread.getClientName().equals(newName)) {
-					LOGGER.log(Level.INFO,"Name already exists. Appended with " + i);	
-					nameIsTaken = true;
-					break innernameloop;
-				}
-			}
+		} else {
+			nameIsTaken = true;
+			LOGGER.log(Level.INFO,"Name already exists.");
+		}
+		return nameIsTaken;
+	}
 
-			if (nameIsTaken) {
-				 newName = mClientHandler.getClientName() + i;
-			} else {
-				// name is not taken
-				break nameloop;
-			}
+	public boolean checkNotAllowedName(String name) {
+		boolean notAllowedName;
+		List<String> invalidNames = getInvalidNames().stream().filter(p -> name.equalsIgnoreCase(p)).collect(Collectors.toList());
+		if (invalidNames.size() == 0) {
+			notAllowedName = false;
+		} else {
+			notAllowedName = true;
+			LOGGER.log(Level.INFO,"Not allowed name chosen: " + name);
+		}
+		return notAllowedName;
+	}
+
+	public boolean checkInvalidName(String name) {
+		boolean inValidName;
+		String patternOneNumber = "[0-9]+";
+		String patternContainsSpace = "\\S";
+		return name.trim().isEmpty() || name.matches(patternOneNumber) || name.matches(patternContainsSpace); 
+	}
+
+	public String nameSuggestor(String newName) {
+		int i = 1;
+		while(checkDoubleName(newName)) {
+			newName = newName + i;
 			i++;
 		}
-		mClientHandler.setClientName(newName);
-		return mClientHandler;
+		
+		return newName;
 	}
+
+
 	// Server functions ----------------------------------------------------------------------------------
 	public void print(String message){
 		System.out.println(message);
@@ -224,7 +265,6 @@ public class Server {
 		return clientHandlerThreads;
 	}
 
-
 	public HashMap<String, String> getChallengePartners() {
 		return challengePartners;
 	}
@@ -253,5 +293,21 @@ public class Server {
 		return clientHandlerThreadsIsPlaying;
 	}
 
+	public List<ClientHandler> getPlayersWaitingForRandomPlay() {
+		List<ClientHandler> allPlayers = getAllPlayers();
+		List<ClientHandler> clientHandlerThreadsIsPlaying = allPlayers.stream()
+				.filter(p -> p.getIsWaitingForRandomPlay())
+				.collect(Collectors.toList());
+
+		return clientHandlerThreadsIsPlaying;
+	}
+
+	public List<String> getInvalidNames() {
+		return this.invalidNames ;
+	}
+
+	public ServerThreadObserver getServerThreadObserver() {
+		return mServerThreadObserver;
+	}
 
 }

@@ -18,6 +18,7 @@ public abstract class Player {
 	private Mark mark;
 	
 	private int prisonersTaken;
+	protected boolean isTimedOut;
 	
 
 	// -- Constructors -----------------------------------------------
@@ -36,6 +37,7 @@ public abstract class Player {
 		this.name = name;
 		this.mark = mark;
 		this.prisonersTaken = 0;
+		this.isTimedOut = false;
 	}
 
 	// -- Queries ----------------------------------------------------
@@ -98,6 +100,13 @@ public abstract class Player {
 			this.prisonersTaken = prisonersTaken;
 		}
 
-	
+		public boolean getIsTimedOut() {
+			return isTimedOut;
+		}
+
+		public void setTimedOut(boolean isTimedOut) {
+			this.isTimedOut = isTimedOut;
+		}
+
 
 }

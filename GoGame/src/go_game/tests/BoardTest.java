@@ -15,6 +15,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class BoardTest {
 	private Board boardSmall;
@@ -24,7 +26,7 @@ public class BoardTest {
 	public void setUp() {
 		// Asuming a 9x9 board
 		boardSmall = new Board(9);
-		//        boardBig = new Board(19);
+		
 	}
 
 	// TESTS FOR SETTING UP OF THE BOARD, VALIDITY OF INDICES, SET FIELDS, RESETS, COPY ETC... 
@@ -59,15 +61,15 @@ public class BoardTest {
 
 	@Test
 	public void testSetAndGetFieldIndex() {
-		boardSmall.setField(0, Mark.XX);
-		assertEquals(Mark.XX, boardSmall.getField(0));
+		boardSmall.setField(0, Mark.WW);
+		assertEquals(Mark.WW, boardSmall.getField(0));
 		assertEquals(Mark.EMPTY, boardSmall.getField(1));
 	}
 
 	@Test
 	public void testSetFieldRowCol() {
-		boardSmall.setField(0, 0, Mark.XX);
-		assertEquals(Mark.XX, boardSmall.getField(0));
+		boardSmall.setField(0, 0, Mark.WW);
+		assertEquals(Mark.WW, boardSmall.getField(0));
 		assertEquals(Mark.EMPTY, boardSmall.getField(0, 1));
 		assertEquals(Mark.EMPTY, boardSmall.getField(1, 0));
 		assertEquals(Mark.EMPTY, boardSmall.getField(1, 1));
@@ -88,24 +90,24 @@ public class BoardTest {
 
 	@Test
 	public void testDeepCopy() {
-		boardSmall.setField(0, Mark.XX);
+		boardSmall.setField(0, Mark.WW);
 		Board deepCopyBoard = boardSmall.deepCopy();
-		deepCopyBoard.setField(0, Mark.OO);
+		deepCopyBoard.setField(0, Mark.BB);
 
-		assertEquals(Mark.XX, boardSmall.getField(0));
-		assertEquals(Mark.OO, deepCopyBoard.getField(0));
+		assertEquals(Mark.WW, boardSmall.getField(0));
+		assertEquals(Mark.BB, deepCopyBoard.getField(0));
 	}
 
 	@Test
 	public void testIsEmptyFieldIndex() {
-		boardSmall.setField(0, Mark.XX);
+		boardSmall.setField(0, Mark.WW);
 		assertFalse(boardSmall.isEmptyField(0));
 		assertTrue(boardSmall.isEmptyField(1));
 	}
 
 	@Test
 	public void testIsEmptyFieldRowCol() {
-		boardSmall.setField(0, 0, Mark.XX);
+		boardSmall.setField(0, 0, Mark.WW);
 		assertFalse(boardSmall.isEmptyField(0, 0));
 		assertTrue(boardSmall.isEmptyField(0, 1));
 		assertTrue(boardSmall.isEmptyField(1, 0));
@@ -155,25 +157,25 @@ public class BoardTest {
 	@Test
 	public void testCornersCapture() {
 		int dim = Board.DIM - 1; // Convert the dimension to start at 0
-		boardSmall.setField(0, 0, Mark.XX);
-		boardSmall.setField(1, 0, Mark.OO);
-		boardSmall.setField(0, 1, Mark.OO);
-		boardSmall.checkLiberties(Mark.XX);
+		boardSmall.setField(0, 0, Mark.WW);
+		boardSmall.setField(1, 0, Mark.BB);
+		boardSmall.setField(0, 1, Mark.BB);
+		boardSmall.checkLiberties(Mark.WW);
 		assertEquals(Mark.EMPTY, boardSmall.getField(0, 0));
-		boardSmall.setField(dim, dim, Mark.XX);
-		boardSmall.setField(dim - 1, dim, Mark.OO);
-		boardSmall.setField(dim, dim - 1, Mark.OO);
-		boardSmall.checkLiberties(Mark.XX);
+		boardSmall.setField(dim, dim, Mark.WW);
+		boardSmall.setField(dim - 1, dim, Mark.BB);
+		boardSmall.setField(dim, dim - 1, Mark.BB);
+		boardSmall.checkLiberties(Mark.WW);
 		assertEquals(Mark.EMPTY, boardSmall.getField(dim, dim));
-		boardSmall.setField(0, dim, Mark.XX);
-		boardSmall.setField(1, dim, Mark.OO);
-		boardSmall.setField(0, dim - 1, Mark.OO);
-		boardSmall.checkLiberties(Mark.XX);
+		boardSmall.setField(0, dim, Mark.WW);
+		boardSmall.setField(1, dim, Mark.BB);
+		boardSmall.setField(0, dim - 1, Mark.BB);
+		boardSmall.checkLiberties(Mark.WW);
 		assertEquals(Mark.EMPTY, boardSmall.getField(0, dim));
-		boardSmall.setField(dim, 0, Mark.XX);
-		boardSmall.setField(dim - 1, 0, Mark.OO);
-		boardSmall.setField(dim, 1, Mark.OO);
-		boardSmall.checkLiberties(Mark.XX);
+		boardSmall.setField(dim, 0, Mark.WW);
+		boardSmall.setField(dim - 1, 0, Mark.BB);
+		boardSmall.setField(dim, 1, Mark.BB);
+		boardSmall.checkLiberties(Mark.WW);
 		assertEquals(Mark.EMPTY, boardSmall.getField(dim, 0));
 		//    	
 	}
@@ -181,11 +183,11 @@ public class BoardTest {
 	@Test
 	public void testUpperSideCapture() {
 		int x = 3; // place
-		boardSmall.setField(0, x, Mark.XX);
-		boardSmall.setField(0, x - 1, Mark.OO);
-		boardSmall.setField(0, x + 1, Mark.OO);
-		boardSmall.setField(1, x, Mark.OO);
-		boardSmall.checkLiberties(Mark.XX);
+		boardSmall.setField(0, x, Mark.WW);
+		boardSmall.setField(0, x - 1, Mark.BB);
+		boardSmall.setField(0, x + 1, Mark.BB);
+		boardSmall.setField(1, x, Mark.BB);
+		boardSmall.checkLiberties(Mark.WW);
 		assertEquals(Mark.EMPTY, boardSmall.getField(0, x));
 
 	}
@@ -194,11 +196,11 @@ public class BoardTest {
 	public void testLowerSideCapture() {
 		int x = 3; // place
 		int dim = Board.DIM - 1; // Convert the dimension to start at 0
-		boardSmall.setField(x, dim, Mark.XX);
-		boardSmall.setField(x - 1, dim, Mark.OO);
-		boardSmall.setField(x + 1, dim, Mark.OO);
-		boardSmall.setField(x, dim - 1, Mark.OO);
-		boardSmall.checkLiberties(Mark.XX);
+		boardSmall.setField(x, dim, Mark.WW);
+		boardSmall.setField(x - 1, dim, Mark.BB);
+		boardSmall.setField(x + 1, dim, Mark.BB);
+		boardSmall.setField(x, dim - 1, Mark.BB);
+		boardSmall.checkLiberties(Mark.WW);
 		assertEquals(Mark.EMPTY, boardSmall.getField(x, dim));
 
 	}
@@ -206,11 +208,11 @@ public class BoardTest {
 	@Test
 	public void testLeftSideCapture() {
 		int x = 3; // place
-		boardSmall.setField(x, 0, Mark.XX);
-		boardSmall.setField(x - 1, 0, Mark.OO);
-		boardSmall.setField(x + 1, 0, Mark.OO);
-		boardSmall.setField(x, 1, Mark.OO);
-		boardSmall.checkLiberties(Mark.XX);
+		boardSmall.setField(x, 0, Mark.WW);
+		boardSmall.setField(x - 1, 0, Mark.BB);
+		boardSmall.setField(x + 1, 0, Mark.BB);
+		boardSmall.setField(x, 1, Mark.BB);
+		boardSmall.checkLiberties(Mark.WW);
 		assertEquals(Mark.EMPTY, boardSmall.getField(x, 0));
 	}
 
@@ -218,33 +220,33 @@ public class BoardTest {
 	public void testRightSideCapture() {
 		int x = 3; // place
 		int dim = Board.DIM - 1; // Convert the dimension to start at 0
-		boardSmall.setField(dim, x, Mark.XX);
-		boardSmall.setField(dim, x - 1, Mark.OO);
-		boardSmall.setField(dim, x + 1, Mark.OO);
-		boardSmall.setField(dim - 1, x, Mark.OO);
-		boardSmall.checkLiberties(Mark.XX);
+		boardSmall.setField(dim, x, Mark.WW);
+		boardSmall.setField(dim, x - 1, Mark.BB);
+		boardSmall.setField(dim, x + 1, Mark.BB);
+		boardSmall.setField(dim - 1, x, Mark.BB);
+		boardSmall.checkLiberties(Mark.WW);
 		assertEquals(Mark.EMPTY, boardSmall.getField(dim, x));
 	}
 
 	@Test
 	public void testCenterCapture() {
 		int x = 4; // place
-		boardSmall.setField(x, x, Mark.XX);
-		boardSmall.setField(x, x - 1, Mark.OO);
-		boardSmall.setField(x, x + 1, Mark.OO);
-		boardSmall.setField(x + 1, x, Mark.OO);
-		boardSmall.setField(x - 1, x, Mark.OO);
-		boardSmall.checkLiberties(Mark.XX);
+		boardSmall.setField(x, x, Mark.WW);
+		boardSmall.setField(x, x - 1, Mark.BB);
+		boardSmall.setField(x, x + 1, Mark.BB);
+		boardSmall.setField(x + 1, x, Mark.BB);
+		boardSmall.setField(x - 1, x, Mark.BB);
+		boardSmall.checkLiberties(Mark.WW);
 		assertEquals(Mark.EMPTY, boardSmall.getField(x, x));
 	}
 
 	// Prohibition of suicide
 	@Test
 	public void testSuicide() {
-		boardSmall.setField(0, 0, Mark.OO);
-		boardSmall.setField(1, 0, Mark.OO);
-		boardSmall.setField(0, 1, Mark.OO);
-		assertTrue(boardSmall.checkSuicide(Mark.OO));
+		boardSmall.setField(0, 0, Mark.BB);
+		boardSmall.setField(1, 0, Mark.BB);
+		boardSmall.setField(0, 1, Mark.BB);
+		assertTrue(boardSmall.checkSuicide(Mark.BB));
 	}
 	
 	// Repeating board (The Ko-rule)
@@ -252,237 +254,194 @@ public class BoardTest {
 	public void testRepeatingBoard() {
 		// Situation alike http://senseis.xmp.net/diagrams/9/7a64a8c8ca6bfadf45207c0400ede024.png
 		// Create a cross figure
-		boardSmall.setField(0, 1, Mark.OO);
-		boardSmall.setField(1, 2, Mark.OO);
-		boardSmall.setField(1, 0, Mark.OO);
-		boardSmall.setField(2, 1, Mark.OO);
+		boardSmall.setField(0, 1, Mark.BB);
+		boardSmall.setField(1, 2, Mark.BB);
+		boardSmall.setField(1, 0, Mark.BB);
+		boardSmall.setField(2, 1, Mark.BB);
 		// And a triangle right next to it
-		boardSmall.setField(0, 2, Mark.XX);
-		boardSmall.setField(1, 3, Mark.XX);
-		boardSmall.setField(2, 2, Mark.XX);
+		boardSmall.setField(0, 2, Mark.WW);
+		boardSmall.setField(1, 3, Mark.WW);
+		boardSmall.setField(2, 2, Mark.WW);
 		// Save the state of the board
 		String boardState1 = boardSmall.createStringRepresentationBoard(boardSmall);
-		System.out.println(boardState1);
+//		System.out.println("State1: \n" + boardState1 + "\n" + boardSmall.toString());
 		boardSmall.addPreviousBoard(boardSmall);
 		// Let XX capture a stone of OO
-		boardSmall.setField(1, 1, Mark.XX);
-		boardSmall.checkLiberties(Mark.OO);
+		boardSmall.setField(1, 1, Mark.WW);
+		boardSmall.checkLiberties(Mark.BB);
 		// Now one stone should be captured
 		assertTrue(boardSmall.isEmptyField(1, 2));
 		// Save the state of the board
 		boardSmall.addPreviousBoard(boardSmall);
 		String boardState2 = boardSmall.createStringRepresentationBoard(boardSmall);
-		System.out.println(boardState2);
+//		System.out.println("State2: \n" + boardState2 + "\n" + boardSmall.toString());
+
 		// Let OO try to take the same position back
 		Board boardSmallTest = boardSmall.deepCopy();
-		boardSmallTest.setField(1, 2, Mark.OO);
-		String boardState3 = boardSmallTest.createStringRepresentationBoard(boardSmall);
-		System.out.println(boardState3);
-		assertTrue(boardSmall.hasKo(boardSmallTest));
+		boardSmallTest.setField(1, 2, Mark.BB);
+		boardSmallTest.checkLiberties(Mark.BB);
+		String boardState3 = boardSmallTest.createStringRepresentationBoard(boardSmallTest);
+//		System.out.println("State3: \n" + boardState3 + "\n" + boardSmallTest.toString());
+		assertTrue("Test check repeating board",boardSmall.hasKo(boardSmallTest));
 	}
 
 
 	// TEST SCORING
 	@Test
-	public void testTerritoryScoringBlackCorner() {
+	public void testTerritoryScoringBlackCornerSmall() {
 		//CHAIN 1: CORNER BLACK
 		int dim = 9;
-		boardSmall.setField(0, 2, Mark.OO);
-		boardSmall.setField(1, 2, Mark.OO);
-		boardSmall.setField(2, 2, Mark.OO);
-		boardSmall.setField(2, 1, Mark.OO);
-		boardSmall.setField(2, 0, Mark.OO);
-		assertEquals("Wrong amount of chains", 1, boardSmall.calculateChains(Mark.XX).size());
-
-		assertEquals("Wrong chain size", 5,boardSmall.calculateChains(Mark.XX).get(0).size());
-		List<Integer> listIndices = Arrays.asList(2,dim + 2, (2*dim) + 2, (2*dim) + 1, (2*dim));
-		assertEquals("Wrong indices added", listIndices, boardSmall.calculateChains(Mark.XX).get(0));
+		boardSmall.setField(0, 2, Mark.BB);
+		boardSmall.setField(1, 2, Mark.BB);
+		boardSmall.setField(2, 2, Mark.BB);
+		boardSmall.setField(2, 1, Mark.BB);
+		boardSmall.setField(2, 0, Mark.BB);
+//		System.out.println(boardSmall.toString());
+		int chainAmount = boardSmall.calculateChainsByStreams(Mark.BB).size();
+		assertEquals("Wrong amount of chains", 1, chainAmount);
+		
+		int chainSize = boardSmall.calculateChainsByStreams(Mark.BB).get(0).size();
+		assertEquals("Wrong chain size", 5, chainSize);
+		
+		List<Integer> listIndices = Arrays.asList(2,dim + 2, (2*dim) + 2, (2*dim) + 1, (2*dim)).stream().sorted().collect(Collectors.toList());
+		List<Integer> calculatedListIndices = boardSmall.calculateChainsByStreams(Mark.BB).get(0).stream().sorted().collect(Collectors.toList());
+		assertEquals("Wrong indices added", listIndices, calculatedListIndices);
 	}
 	@Test
-	public void testTerritoryScoringWhiteCorner() {
+	public void testTerritoryScoringWhiteCornerBig() {
 		// CHAIN 2: CORNER WHITE
-		int dim = 9;
-		boardSmall.setField(0, 2, Mark.XX);
-		boardSmall.setField(1, 2, Mark.XX);
-		boardSmall.setField(2, 2, Mark.XX);
-		boardSmall.setField(2, 1, Mark.XX);
-		boardSmall.setField(2, 0, Mark.XX);
-		assertEquals(1, boardSmall.calculateChains(Mark.XX));
+		int dim = 19;
+		Board boardBig = new Board(dim);
+		boardBig.setField(0, 2, Mark.WW);
+		boardBig.setField(1, 2, Mark.WW);
+		boardBig.setField(2, 2, Mark.WW);
+		boardBig.setField(2, 1, Mark.WW);
+		boardBig.setField(2, 0, Mark.WW);
+//		System.out.println(boardSmall.toString());
+		int chainAmount = boardBig.calculateChainsByStreams(Mark.WW).size();
+		assertEquals("Wrong amount of chains", 1, chainAmount);
 		
-		assertEquals(5,boardSmall.calculateChains(Mark.XX).get(0).size());
-		List<Integer> listIndices = Arrays.asList(2,dim + 2, (2*dim) + 2, (2*dim) + 1, (2*dim));
-		assertEquals(listIndices, boardSmall.calculateChains(Mark.XX).get(0));
+		int chainSize = boardBig.calculateChainsByStreams(Mark.WW).get(0).size();
+		assertEquals("Wrong chain size", 5, chainSize);
+		
+		List<Integer> listIndices = Arrays.asList(2,dim + 2, (2*dim) + 2, (2*dim) + 1, (2*dim)).stream().sorted().collect(Collectors.toList());
+		List<Integer> calculatedListIndices = boardBig.calculateChainsByStreams(Mark.WW).get(0).stream().sorted().collect(Collectors.toList());
+		assertEquals("Wrong indices added", listIndices, calculatedListIndices);
 		
 	}
-//		
-//		// CHAIN 3: SPLIT CHAIN
-//		boardSmall.setField(0, dim, Mark.XX);
-//		boardSmall.setField(1, dim, Mark.OO);
-//		boardSmall.setField(0, dim - 1, Mark.OO);
+	
+	@Test
+	public void testSplitChain() {
+		// CHAIN 3: SPLIT CHAIN
+		int dim = 9;
+		boardSmall.setField(0, dim - 1, Mark.BB);
+		boardSmall.setField(0, 0, Mark.BB);
+		boardSmall.setField(1, 0, Mark.BB);
+		boardSmall.setField(1, dim - 1, Mark.WW);
+		boardSmall.setField(2, dim - 1, Mark.BB);
 //		boardSmall.checkLiberties(Mark.XX);
-//		
-//		// CHAIN 4: CORNER CHAIN
-//		assertEquals(Mark.EMPTY, boardSmall.getField(0, dim));
-//		boardSmall.setField(dim, 0, Mark.XX);
-//		boardSmall.setField(dim - 1, 0, Mark.OO);
-//		boardSmall.setField(dim, 1, Mark.OO);
-//		boardSmall.checkLiberties(Mark.XX);
-//		assertEquals(Mark.EMPTY, boardSmall.getField(dim, 0));
-//
-//		// CHAIN 5: SIDE CHAIN
-//		
-//		
-//		// CHAIN 6: MIDDLE CHAIN
-//	}
+		System.out.println("Split chain: \n" + boardSmall.toString());
+		
+		List<List<Integer>> chainsBlack = boardSmall.calculateChainsByStreams(Mark.BB);
+		List<List<Integer>> chainsWhite = boardSmall.calculateChainsByStreams(Mark.WW);
+		System.out.println("Chains Black: " + chainsBlack);
+		System.out.println("Chains White: " + chainsWhite);
+		
+		assertEquals("Wrong amount of black chains", 3, chainsBlack.size());
+		assertEquals("Wrong amount of white chains", 1, chainsWhite.size());
+	}
+		
+		// CHAIN 4: CORNER Capture
+	@Test
+	public void testCornerCapture() {
+		int dim = 9 - 1;
+		assertEquals(Mark.EMPTY, boardSmall.getField(0, dim));
+		boardSmall.setField(dim, 0, Mark.WW);
+		boardSmall.setField(dim - 1, 0, Mark.BB);
+		boardSmall.setField(dim, 1, Mark.BB);
+		boardSmall.checkLiberties(Mark.WW);
+//		System.out.println("Corner chain: \n" + boardSmall.toString());
+		assertEquals(Mark.EMPTY, boardSmall.getField(dim, 0));
+	}
 
+	@Test
+	public void testMultipleChains() {
+		Board boardSmall = new Board(9);
+		int dim = 9;
+		// Chain 1
+		boardSmall.setField(0, 2, Mark.BB);
+		boardSmall.setField(1, 2, Mark.BB);
+		boardSmall.setField(2, 2, Mark.BB);
+		boardSmall.setField(2, 1, Mark.BB);
+		boardSmall.setField(2, 0, Mark.BB);
+		
+		// Chain 2
+		boardSmall.setField(0, dim-3, Mark.BB);
+		boardSmall.setField(1, dim-3, Mark.BB);
+		boardSmall.setField(2, dim-3, Mark.BB);
+		boardSmall.setField(2, dim-2, Mark.BB);
+		boardSmall.setField(2, dim-1, Mark.BB);
+		
+		// Chain 3
+		for (int j = 0; j < dim; j++) {
+			boardSmall.setField(6, j, Mark.WW);
+		}
+		
+//		System.out.println("Multiple chains: \n" + boardSmall.toString());
+		List<List<Integer>> chainsBlack = boardSmall.calculateChainsByStreams(Mark.BB);
+		List<List<Integer>> chainsWhite = boardSmall.calculateChainsByStreams(Mark.WW);
+		assertEquals("Wrong amount of black chains", 2, chainsBlack.size());
+		assertEquals("Wrong amount of white chains", 1, chainsWhite.size());
+//		System.out.println("Chains Black: " + chainsBlack);
+//		System.out.println("Chains White: " + chainsWhite);
+	}
+	
+	@Test
+	public void testAreas(){
+		Board boardSmall = new Board(9);
+		int dim = 9;
+		// Chain 1
+		boardSmall.setField(0, 2, Mark.BB);
+		boardSmall.setField(1, 2, Mark.BB);
+		boardSmall.setField(2, 2, Mark.BB);
+		boardSmall.setField(2, 1, Mark.BB);
+		boardSmall.setField(2, 0, Mark.BB);
+		
+		// Chain 2
+		boardSmall.setField(0, dim-3, Mark.BB);
+		boardSmall.setField(1, dim-3, Mark.BB);
+		boardSmall.setField(2, dim-3, Mark.BB);
+		boardSmall.setField(2, dim-2, Mark.BB);
+		boardSmall.setField(2, dim-1, Mark.BB);
+		
+		// Chain 3
+		for (int j = 0; j < dim; j++) {
+			boardSmall.setField(6, j, Mark.WW);
+		}
+		
+//		System.out.println("Multiple chains: \n" + boardSmall.toString());
+		List<List<Integer>> chainsBlack = boardSmall.calculateChainsByStreams(Mark.BB);
+		List<List<Integer>> chainsWhite = boardSmall.calculateChainsByStreams(Mark.WW);
+		List<List<Integer>> areas = boardSmall.calculateAreas(Mark.WW);
+		System.out.println("Areas: " + areas);
+		
+		Map<String, Integer> a = boardSmall.calculateScore();
+	}
+	
+	@Test
+	public void testDimensions(){
+		assertEquals("Check dimensions", 9, boardSmall.getDimensions());
+	}
+	
+	@Test
+	public void testLastMove(){
+		boardSmall.setField(0, 2, Mark.WW);
+		boardSmall.setField(1, 2, Mark.BB);
+		
+		assertEquals("Check last move", 9+2, boardSmall.getIndexLastMove());
+	}
+	
+	// TODO: DeadStones
 }
-//    @Test
-//    public void testIsFull() {
-//        for (int i = 0; i < 8; i++) {
-//            board.setField(i, Mark.XX);
-//        }
-//        assertFalse("Joepie1", board.isFull());
-//
-//        board.setField(8, Mark.XX);
-//        assertTrue("Joepie2", board.isFull());
-//    }
-//
-//    @Test
-//    public void testGameOverFullBoard() {
-//        /**
-//         * xxo
-//         * oox
-//         * xxo
-//         */
-//        board.setField(0, 0, Mark.XX);
-//        board.setField(0, 1, Mark.XX);
-//        board.setField(0, 2, Mark.OO);
-//        board.setField(1, 0, Mark.OO);
-//        board.setField(1, 1, Mark.OO);
-//        board.setField(1, 2, Mark.XX);
-//        board.setField(2, 0, Mark.XX);
-//        board.setField(2, 1, Mark.OO);
-//
-//        assertFalse(board.gameOver());
-//        board.setField(2, 2, Mark.XX);
-//        assertTrue(board.gameOver());
-//    }
-//
-//    @Test
-//    public void testHasRow() {
-//        board.setField(0, Mark.XX);
-//        board.setField(1, Mark.XX);
-//        assertFalse(board.hasRow(Mark.XX));
-//        assertFalse(board.hasRow(Mark.OO));
-//
-//        board.setField(2, Mark.XX);
-//        assertTrue(board.hasRow(Mark.XX));
-//        assertFalse(board.hasRow(Mark.OO));
-//    }
-//
-//    @Test
-//    public void testHasColumn() {
-//        board.setField(0, Mark.XX);
-//        board.setField(3, Mark.XX);
-//        assertFalse(board.hasColumn(Mark.XX));
-//        assertFalse(board.hasColumn(Mark.OO));
-//
-//        board.setField(6, Mark.XX);
-//        assertTrue(board.hasColumn(Mark.XX));
-//        assertFalse(board.hasColumn(Mark.OO));
-//    }
-//
-//    @Test
-//    public void testHasDiagonalDown() {
-//        board.setField(0, 0, Mark.XX);
-//        board.setField(1, 1, Mark.XX);
-//        assertFalse(board.hasDiagonal(Mark.XX));
-//        assertFalse(board.hasDiagonal(Mark.OO));
-//
-//        board.setField(2, 2, Mark.XX);
-//        assertTrue(board.hasDiagonal(Mark.XX));
-//        assertFalse(board.hasDiagonal(Mark.OO));
-//    }
-//
-//    @Test
-//    public void testHasDiagonalUp() {
-//        board.setField(0, 2, Mark.XX);
-//        board.setField(1, 1, Mark.XX);
-//        assertFalse(board.hasDiagonal(Mark.XX));
-//        assertFalse(board.hasDiagonal(Mark.OO));
-//
-//        board.setField(2, 0, Mark.XX);
-//        assertTrue(board.hasDiagonal(Mark.XX));
-//        assertFalse(board.hasDiagonal(Mark.OO));
-//    }
-//
-//    @Test
-//    public void testIsWinner() {
-//        board.setField(0, Mark.XX);
-//        board.setField(1, Mark.XX);
-//        assertFalse(board.isWinner(Mark.XX));
-//        assertFalse(board.isWinner(Mark.OO));
-//
-//        board.setField(2, Mark.XX);
-//        assertTrue(board.isWinner(Mark.XX));
-//        assertFalse(board.isWinner(Mark.OO));
-//
-//        board.setField(0, 0, Mark.OO);
-//        board.setField(1, 1, Mark.OO);
-//        assertFalse(board.isWinner(Mark.XX));
-//        assertFalse(board.isWinner(Mark.OO));
-//
-//        board.setField(2, 2, Mark.OO);
-//        assertFalse(board.isWinner(Mark.XX));
-//        assertTrue(board.isWinner(Mark.OO));
-//    }
-//
-//    @Test
-//    public void testHasNoWinnerFullBoard() {
-//        /**
-//         * xxo
-//         * oox
-//         * xxo
-//         */
-//        board.setField(0, 0, Mark.XX);
-//        board.setField(0, 1, Mark.XX);
-//        board.setField(0, 2, Mark.OO);
-//        board.setField(1, 0, Mark.OO);
-//        board.setField(1, 1, Mark.OO);
-//        board.setField(1, 2, Mark.XX);
-//        board.setField(2, 0, Mark.XX);
-//        board.setField(2, 1, Mark.OO);
-//        board.setField(2, 2, Mark.XX);
-//        assertFalse(board.hasWinner());
-//    }
-//
-//    @Test
-//    public void testHasWinnerRow() {
-//        board.setField(0, Mark.XX);
-//        board.setField(1, Mark.XX);
-//        assertFalse(board.hasWinner());
-//
-//        board.setField(2, Mark.XX);
-//        assertTrue(board.hasWinner());
-//    }
-//
-//    @Test
-//    public void testHasWinnerColumn() {
-//        board.setField(0, Mark.XX);
-//        board.setField(3, Mark.XX);
-//        assertFalse(board.hasWinner());
-//
-//        board.setField(6, Mark.XX);
-//        assertTrue(board.hasWinner());
-//    }
-//
-//    @Test
-//    public void testHasWinnerDiagonal() {
-//        board.setField(0, Mark.XX);
-//        board.setField(1, Mark.XX);
-//        assertFalse(board.hasWinner());
-//
-//        board.setField(2, Mark.XX);
-//        assertTrue(board.hasWinner());
-//    }
+
 

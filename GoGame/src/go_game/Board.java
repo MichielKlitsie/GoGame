@@ -65,7 +65,7 @@ public class Board {
 
 	// The 'inbetween line', taken from the second line of the empty board
 	private static final String LINE = NUMBERING[1]; 
-	private static final String EMPTYLINEPIECE = "|   ";
+	public static final String EMPTYLINEPIECE = "|   ";
 	// The delimiter, empty in this case
 	private static final String DELIM = "";
 	private static final String DELIM_BETWEEN = "   ";
@@ -289,76 +289,6 @@ public class Board {
 
 
 	// GAME RULES ---------------------------------------------------------------------------------------------
-	// TIC TAC TOE RULES!!!
-	//	/**
-	//	 * Checks whether there is a row which is full and only contains the mark
-	//	 * m.
-	//	 *
-	//	 * @param m
-	//	 *            the mark of interest
-	//	 * @return true if there is a row controlled by m
-	//	 */
-	//	/*@ pure */
-	//	public boolean hasRow(Mark m) {
-	//		
-	//		for (int i = 0; i < DIM; i++) {  // rows
-	//			for (int j = 0; j < DIM; j++) { // cols
-	//				if (m != this.getField(i,j)) {
-	//					break;
-	//				} else if (j == DIM - 1) {
-	//					return true;
-	//				}
-	//			}
-	//		}
-	//		return false;
-	//	}
-	//
-	//	/**
-	//	 * Checks whether there is a column which is full and only contains the mark
-	//	 * m.
-	//	 *
-	//	 * @param m
-	//	 *            the mark of interest
-	//	 * @return true if there is a column controlled by m
-	//	 */
-	//	/*@ pure */
-	//	public boolean hasColumn(Mark m) {
-	//		
-	//		for (int i = 0; i < DIM; i++) {  // rows
-	//			for (int j = 0; j < DIM; j++) { // cols
-	//				if (m != this.getField(j,i)) { // SUBTLE CHANGE I AND J SWITCHED!!!
-	//					break;
-	//				} else if (j == DIM - 1) {
-	//					return true;
-	//				}
-	//			}
-	//		}
-	//		return false;
-	//	}
-	//
-	//	/**
-	//	 * Checks whether there is a diagonal which is full and only contains the
-	//	 * mark m.
-	//	 *
-	//	 * @param m
-	//	 *            the mark of interest
-	//	 * @return true if there is a diagonal controlled by m
-	//	 */
-	//	/*@ pure */
-	//	public boolean hasDiagonal(Mark m) {
-	//		
-	//		if (this.getField(0) == m && 
-	//				this.getField(4) == m && 
-	//				this.getField(8) == m) { // Diagonal 1
-	//			return true;
-	//		} else if (this.getField(2) == m && 
-	//				this.getField(4) == m && 
-	//				this.getField(6) == m) { // Diagonal 2
-	//			return true;			
-	//		}
-	//		return false;
-	//	}
-
 	// GO RULES!!!
 	/**
 	 * Checks whether a made move results in a stone without a liberty
@@ -500,7 +430,7 @@ public class Board {
 		// Afhankelijk van type scoring, maar volgens regels is territory scoring 
 
 		// Aantal vakjes van territory
-		Mark mark = Mark.OO;
+		Mark mark = Mark.BB;
 		List<List<Integer>> areas = calculateAreas(mark);
 
 		// Who's area is that whos mark
@@ -519,8 +449,8 @@ public class Board {
 					Integer emptyFieldIndex = area.get(j);
 					List<Integer> b = getAdjecentFields(emptyFieldIndex);
 					for (int z = 0; z < b.size(); z++) {
-						if(getField((b.get(z))).equals(Mark.OO)) {areaTouchesBlack = true; }
-						if(getField((b.get(z))).equals(Mark.XX)) {areaTouchesWhite = true; }
+						if(getField((b.get(z))).equals(Mark.BB)) {areaTouchesBlack = true; }
+						if(getField((b.get(z))).equals(Mark.WW)) {areaTouchesWhite = true; }
 						if(areaTouchesWhite && areaTouchesBlack) {break arealoop;}
 					}
 				}
@@ -530,11 +460,11 @@ public class Board {
 				areasMarks.add(Mark.EMPTY); 
 				System.out.println("...of nobody!"); 
 			} else if(areaTouchesWhite && !areaTouchesBlack) {
-				areasMarks.add(Mark.XX); 
+				areasMarks.add(Mark.WW); 
 				scoreWhite = scoreWhite + area.size();
 				System.out.println("...WHITE!");
 			} else if(!areaTouchesWhite && areaTouchesBlack) {
-				areasMarks.add(Mark.OO); 
+				areasMarks.add(Mark.BB); 
 				scoreBlack = scoreBlack + area.size();
 				System.out.println("...BLACK!");
 			} else {
@@ -578,11 +508,11 @@ public class Board {
 		// Create a list from 1 to DIM * DIM
 		List<Integer> allFieldIndexes = IntStream.range(0, DIM * DIM).boxed().collect(Collectors.toList());
 		List<Integer> filteredIndices = allFieldIndexes.stream().filter(f -> getField(f).equals(mark)).collect(Collectors.toList());
-		System.out.println("Filtered list of size " + filteredIndices.size());
+//		System.out.println("Filtered list of size " + filteredIndices.size());
 
 		// Filter connected marks
 		List<List<Integer>> chains = new ArrayList<List<Integer>>();
-		while(filteredIndices.size() > 1) {
+		while(filteredIndices.size() > 0) {
 			List<Integer> newChain = new ArrayList<Integer>();
 			List<Integer> newChainFilled = recursiveChainMaker(newChain,filteredIndices.get(0), mark);
 			chains.add(newChainFilled);
@@ -607,13 +537,7 @@ public class Board {
 		}
 		return previousChain;
 	}
-
-	public List<Integer> addToChain(List<Integer> chain, int fieldIndex) {
-		if(!chain.contains(fieldIndex)) {
-			chain.add(fieldIndex);
-		}
-		return chain;
-	}
+	
 	public List<Integer> getSameMarkAdjecentFields(int fieldIndex, Mark mark) {
 		List<Integer> adjecentFields  = getAdjecentFields(fieldIndex);
 		List<Integer> sameMarkAdjecentFields = adjecentFields.stream()
@@ -622,104 +546,11 @@ public class Board {
 		return sameMarkAdjecentFields;
 	}
 
-	//	public List<List<Integer>> calculateChains(Mark mark) {
-	//		// Step 0: Initialize a list to keep the chain of fields
-	//		List<List<Integer>> chains = new ArrayList<List<Integer>>();
-	//		List<Integer> singleChainIndices = new ArrayList<Integer>();
-	//
-	//		// Step 1: CHECK FOR EVERY FIELD...
-	//		for(int currentField = 0; currentField < DIM * DIM; currentField++) {
-	//
-	//			// Step 2a: IF THE FIELD IS IS OF THE INPUTTED MARK...
-	//			if (getField(currentField).equals(mark)) {
-	//
-	//				// Step 2b: CHECK IF THE FIELD IS ALREADY PART OF A PREVIOUS CHAIN
-	//				boolean alreadyInChain = false;
-	//				innerloop:
-	//					for(int j = 0; j < chains.size(); j++) {
-	//						List<Integer> currentChain = chains.get(j);
-	//						alreadyInChain = currentChain.contains(currentField);
-	//						break innerloop;
-	//					}
-	//
-	//				// Step 3a: IF NOT ALREADY IN CHAIN
-	//				if (!alreadyInChain) {
-	//					// Step 3b: start a new chain
-	//					singleChainIndices = new ArrayList<Integer>();
-	//					// Step 3c: and add the index
-	//					singleChainIndices.add(currentField);
-	//					
-	//
-	//
-	//					// Step 4: From here, GET THE SURROUNDING FIELDS of the current field 
-	//					List<Integer> adjecentFields  = getAdjecentFields(currentField);
-	//					// Initialize list to keep track of the newly added fields
-	//					List<Integer> newlyAddedIndices = new ArrayList<Integer>();
-	//
-	//					// Step 5: CHECK THE MARKS OF THE SURROUNDING FIELDS
-	//					
-	//					// IF MORE THAN 1 INDEX WAS ADDED, THE CHAIN IS SPLIT
-	//					if(newlyAddedIndices.size() < 1) {
-	//
-	//						// Just one index added, make starting point of further calculation
-	//					} else if (newlyAddedIndices.size() == 1) {
-	//						
-	//						// No index is added, the chain has been ended...
-	//					} else {
-	//						// End chain
-	//						chains.add(singleChainIndices);
-	//					}
-	//				}
-	//			}
-	//		}
-	//
-	//		return chains;
-	//	}
-
-
-
-
+	
 	public void removeDeadStones() {
 		// At the end of the game, the stones that are still on the board, but unable to avoid capture become prisoners
 	}
-	//	/**
-	//	 * Checks if the mark m has won. A mark wins if it controls at
-	//	 * least one row, column or diagonal.
-	//	 *
-	//	 * @param m
-	//	 *            the mark of interest
-	//	 * @return true if the mark has won
-	//	 */
-	//	//@requires m == Mark.XX | m == Mark.OO;
-	//	//@ ensures \result == this.hasRow(m) || this.hasColumn(m) | this.hasDiagonal(m);
-	//	/*@ pure */
-	//	public boolean isWinner(Mark m) {
-	////		assert m == Mark.XX || m == Mark.OO;
-	////		
-	////		if (this.hasColumn(m) || this.hasDiagonal(m) || this.hasRow(m)) {
-	////			return true;
-	////		}
-	//		
-	//		// ADD RULE FOR TWO PASSES
-	//		return false;
-	//	}
-
-	//	/**
-	//	 * Returns true if the game has a winner. This is the case when one of the
-	//	 * marks controls at least one row, column or diagonal.
-	//	 *
-	//	 * @return true if the student has a winner.
-	//	 */
-	//	//@ ensures \result == isWinner(Mark.XX) | \result == isWinner(Mark.OO);
-	//	/*@pure*/
-	//	public boolean hasWinner() {
-	//		
-	//		if (this.isWinner(Mark.XX) || this.isWinner(Mark.OO)) {
-	//			return true;
-	//		}
-	//		return false;
-	//	}
-
+	
 	// DRAWING OF THE BOARD ---------------------------------------------------------------------------------------------
 	/**
 	 * Returns a String representation of this board. In addition to the current
@@ -727,13 +558,9 @@ public class Board {
 	 *
 	 * @return the game situation as String
 	 */
-	public String toString() {
+	public String toStringOnCommandLine() {
 		// Initialize empty string
 		String s = "";
-
-		// First string showing the playboard and the empty board
-		//		String firstLine = "Play-board                         "+ DELIM_BETWEEN + "Empty board                         \n";
-		//		s = firstLine;
 
 		// Fill each row
 		for (int i = 0; i < DIM; i++) {
@@ -742,7 +569,7 @@ public class Board {
 			// Fill each column
 			for (int j = 0; j < DIM; j++) {
 				// Append the previous row with a field and "---" or the letter if last
-				row = row + getField(i, j).toString();
+				row = row + getField(i, j).toStringNiceInclHint();
 				if (j < DIM - 1) {
 					// Draw line between each field
 					row = row + "---";
@@ -775,49 +602,26 @@ public class Board {
 				lastLine = lastLine + z + "  ";
 			}
 		}
-		s = s + "\n" + lastLine; // + DELIM_BETWEEN + lastLine;
+		s = s + "\n" + lastLine + "\n"; // + DELIM_BETWEEN + lastLine;
 		return s;
 	}
+	
 
-	//	public String toString() {
-	//		// Initialize empty string
-	//		String s = "";
-	//
-	//		// First string showing the playboard and the empty board
-	//		String firstLine = "Play-board                         "+ DELIM_BETWEEN + "Empty board                         \n";
-	//		s = firstLine;
-	//
-	//		// Fill each row
-	//		for (int i = 0; i < DIM; i++) {
-	//			String row = "";
-	//
-	//			// Fill each column
-	//			for (int j = 0; j < DIM; j++) {
-	//				// Append the previous row with a field and "---" or the letter if last
-	//				row = row + getField(i, j).toString();
-	//				if (j < DIM - 1) {
-	//					// Draw line between each field
-	//					row = row + "---";
-	//				} else {
-	//					// End the row with the corresponding row letter
-	//					String emptyBoardRow = NUMBERING[i * 2];
-	//					String letterRow = emptyBoardRow.substring(emptyBoardRow.length() - 1);
-	//					row = row + " " + letterRow;
-	//				}
-	//			}
-	//			// Append previous string with the new row + optional delimiter + an line from the full empty board
-	//			s = s + row + DELIM_BETWEEN + NUMBERING[i * 2];
-	//
-	//			// Between the fields an empty line and a line from the full empty board
-	//			if (i < DIM - 1) {
-	//				s = s + "\n" + LINE + DELIM_BETWEEN + NUMBERING[i * 2 + 1] + "\n";
-	//			}
-	//		}
-	//
-	//		String lastLine = NUMBERING[(2 * (DIM - 1)) + 1];
-	//		s = s + "\n" + lastLine + DELIM_BETWEEN + lastLine;
-	//		return s;
-	//	}
+	/**
+	 * Make a string representation for the check in the HashMap for the 'SuperKo'.
+	 * @param board
+	 * @return String stringBoard
+	 */
+	public String createStringRepresentationBoard(Board board) {
+		String stringBoard = "";
+		for (int i = 0; i < DIM * DIM; i++) {
+			stringBoard = stringBoard + board.getField(i).toStringForProtocol();
+		}
+		//		System.out.println(stringBoard);
+
+		return stringBoard;
+	}
+
 
 	// GAME RESET: CLEAR ALL FIELDS ---------------------------------------------------------------------------------------------
 	/**
@@ -875,21 +679,6 @@ public class Board {
 		String stringBoard = createStringRepresentationBoard(board);
 		// Add to hashset
 		previousBoards.add(stringBoard);
-	}
-
-	/**
-	 * Make a string representation for the check in the HashMap for the 'SuperKo'.
-	 * @param board
-	 * @return String stringBoard
-	 */
-	public String createStringRepresentationBoard(Board board) {
-		String stringBoard = "";
-		for (int i = 0; i < DIM * DIM; i++) {
-			stringBoard = stringBoard + board.getField(i).toString();
-		}
-		//		System.out.println(stringBoard);
-
-		return stringBoard;
 	}
 
 	public int getIndexLastMove() {

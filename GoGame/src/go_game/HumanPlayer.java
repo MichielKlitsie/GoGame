@@ -2,6 +2,7 @@ package go_game;
 
 import java.util.Scanner;
 
+import go_game.protocol.Constants4;
 import go_game.server.ClientHandler;
 
 /**
@@ -10,7 +11,7 @@ import go_game.server.ClientHandler;
  * @author Michiel Klitsie
  * @version $Revision: 1.1 $
  */
-public class HumanPlayer extends Player {
+public class HumanPlayer extends Player implements Constants4 {
 
 	//	static Scanner line = new Scanner(System.in);
 
@@ -53,39 +54,44 @@ public class HumanPlayer extends Player {
 	public int determineMove(Board board) {
 		int choice = -999;
 		// What does the human player see when making a move
-		String prompt = "> " + getName() + " (" + getMark().toString() + ")"
+		String prompt = CHAT + DELIMITER + "> " + getName() + " (" + getMark().toString() + ")"
 				+ ", what is your choice? \n" +
 				"INPUT: MOVE (int row, int column), MOVE (char row, int column), MOVE index or MOVE 'PASS' \n" +
 				"Enter input: ";
 
 		// Scan for input, see method readInt(prompt) below
 		clientHandler.sendMessageToClient(prompt);
-		
+
 		// Input asked, which makes use of a blocking call
 		// WAIT FOR INPUT FUNCTIONALITY
 		while(!clientHandler.getMoveHasBeenMade()) {
-			try {
-				Thread.sleep(500); // Wait for a bit
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
+			if (!isTimedOut) {
+				try {
+					Thread.sleep(500); // Wait for a bit
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} 
+			} else {
+				// Break the loop with a dummy variable
+				return -999;
+			}
 		}
-		
+
 		// Directly changing the move status
 		clientHandler.setMoveHasBeenMade(false);
-				//clientHandler.waitForInput();
-		
+		//clientHandler.waitForInput();
+
 		// Convert the input to the a field. Example (A,1) = 0 or (C,5) = 22
 		if (clientHandler.getPassMoveMade()) {
-			String passMessage = this.getName() + " has passed on his turn...";
+			String passMessage = CHAT + DELIMITER + this.getName() + " has passed on his turn...";
 			System.out.println(passMessage);
-			
+
 			clientHandler.setPassMoveMade(false);
-			
+
 			clientHandler.sendMessageToClient(passMessage);
 			choice = -1;
-//			return choice;
+			//			return choice;
 		} else if (clientHandler.getIndexMoveMade()) {
 			choice = clientHandler.getLastIndexMove();
 			clientHandler.setIndexMoveMade(false);
@@ -93,11 +99,11 @@ public class HumanPlayer extends Player {
 			// Obtain result of determine move
 			int[] lastMove = clientHandler.getLastMove();
 			System.out.println("Last move in HumanPlayer: (" + lastMove[0] + ", " + lastMove[1] + ")");
-	
+
 			choice = board.index(lastMove[0] - 1, lastMove[1] - 1);
 		}
-		
-		
+
+
 		return choice;
 	}
 
@@ -132,15 +138,20 @@ public class HumanPlayer extends Player {
 		}
 
 	}
-	
-	public ClientHandler getClientHandler() {
-		// Message functionality here
-		return this.clientHandler;
-	}
-	
+
+
 	public void sentMessage(String msg) {
 		getClientHandler().sendMessageToClient(msg);
 	}
 
-	
+	// ------------------------------------------
+	// GETTERS AND SETTERS
+	// ------------------------------------------
+
+	public ClientHandler getClientHandler() {
+		// Message functionality here
+		return this.clientHandler;
+	}
+
+
 }

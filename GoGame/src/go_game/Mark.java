@@ -1,5 +1,7 @@
 package go_game;
 
+import go_game.protocol.Constants4;
+
 /**
  * Represents a mark in the Go game. There three possible values:
  * Mark.XX, Mark.OO and Mark.EMPTY.
@@ -7,9 +9,10 @@ package go_game;
  * @author Michiel Klitsie
  * @version $Revision: 1.1 $
  */
-public enum Mark {
+public enum Mark implements Constants4 {
     
-    EMPTY, XX, OO;
+	// 
+    EMPTY, WW, BB, HH, hh;
 
     /*@
        ensures this == Mark.XX ==> \result == Mark.OO;
@@ -22,22 +25,36 @@ public enum Mark {
      * @return the other mark is this mark is not EMPTY or EMPTY
      */
     public Mark other() {
-        if (this == XX) {
-            return OO;
-        } else if (this == OO) {
-            return XX;
+        if (this == WW) {
+            return BB;
+        } else if (this == BB) {
+            return WW;
         } else {
             return EMPTY;
         }
     }
     
-    public String toString() {
-    	if (this == XX) {
-            return "X";
-        } else if (this == OO) {
-            return "O";
+    public String toStringNiceInclHint() {
+    	if (this == WW) {
+            return "W";
+        } else if (this == BB) {
+            return "B";
+        } else if (this == HH) {
+        	return "H";
+        } else if (this == hh) {
+        	return "h";
         } else {
             return "|";
+        }
+    }
+    
+    public String toStringForProtocol() {
+    	if (this == WW) {
+            return W;
+        } else if (this == BB) {
+            return B;
+        } else {
+            return E;
         }
     }
 }

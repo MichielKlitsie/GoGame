@@ -10,6 +10,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import go_game.protocol.Constants2;
+import go_game.protocol.Constants3;
+import go_game.protocol.Constants4;
 
 
 /**
@@ -17,7 +19,7 @@ import go_game.protocol.Constants2;
  * @author  Michiel Klitsie
  * @version $Revision: 1.1 $
  */
-public class Client extends Thread implements Constants2 {
+public class Client extends Thread implements Constants4 {
 	private static final String USAGE = "usage: java week7.cmdchat.Client <name> <address> <port>";
 	public static Client client;
 //	// SHUTDOWN HOOK
@@ -72,8 +74,8 @@ public class Client extends Thread implements Constants2 {
 			});
 			
 			// Handshake message is sending the name
-			client.sendMessage(args[0]);
-//			this.wait();
+//			client.sendMessage(args[0]);
+			client.sendMessage(NEWPLAYER + DELIMITER + args[0]);
 			client.start();
 
 			do {
@@ -149,7 +151,7 @@ public class Client extends Thread implements Constants2 {
 		try {
 			out.write(msg + "\n");
 			out.flush();
-			if (msg.equalsIgnoreCase("exit")) {
+			if (msg.equalsIgnoreCase(QUIT)) {
 //				System.out.println("System shutting down..");
 				shutdown();
 			}
