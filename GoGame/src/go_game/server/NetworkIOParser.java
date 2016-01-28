@@ -7,17 +7,20 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import go_game.Board;
 import go_game.Game;
 import go_game.HumanPlayer;
 import go_game.Mark;
 import go_game.Player;
+import go_game.RandomStrategy;
+import go_game.Strategy;
+import go_game.protocol.AdditionalConstants;
 import go_game.protocol.Constants2;
 import go_game.protocol.Constants3;
 import go_game.protocol.Constants4;
 
-public class NetworkIOParser implements Constants4 {
+public class NetworkIOParser implements Constants4, AdditionalConstants {
 
-	private static final String GETALLTHREADS = "GETALLTHREADS";
 	// Instance variables ----------------------------
 	private String inputString;
 	private String outputString;
@@ -43,15 +46,7 @@ public class NetworkIOParser implements Constants4 {
 
 
 
-	// ADDITIONAL COMMANDS
-	private static final String GETSTATUS = "GETSTATUS";
-	private static final String CLIENTEXIT = "CLIENTEXIT";
-	private static final String EXIT = "EXIT";
-	private static final String CHANGENAME = "CHANGENAME";
-	private static final String STATUS = "STATUS";
 
-	// Linebreak
-	private static final String LINEBREAK = "//----------------------------\n";
 
 	// Constructor ----------------------------
 	/**
@@ -168,7 +163,7 @@ public class NetworkIOParser implements Constants4 {
 
 				if (listOfPlayersWaiting.size() == 0) {
 					clientHandler.sendMessageToClient(WAITFOROPPONENT);
-					clientHandler.setWaitingForRandomPlay(true);
+					clientHandler.setIsWaitingForRandomPlay(true);
 					clientHandler.setIsInLobby(false);
 					server.broadcast(CHAT + DELIMITER + "[" + clientHandler.getClientName() + " is waiting on somebody to write 'PLAY']\n");
 				} else {
@@ -208,7 +203,7 @@ public class NetworkIOParser implements Constants4 {
 				break;
 			} else if (this.isInLobby) {
 				clientHandler.sendMessageToClient(CHAT + DELIMITER + "Wait for an opponent to play as well. \n");
-				clientHandler.setWaitingForRandomPlay(true);
+				clientHandler.setIsWaitingForRandomPlay(true);
 				break;
 			}
 
@@ -233,9 +228,6 @@ public class NetworkIOParser implements Constants4 {
 						clientHandler.sendGameStartToServer(nameChallenger, nameChallenged, 9, BLACK, clientHandler);
 					} else {
 						// RESPONSIBILITY ON THE CHALLENGED SIDE TO START THE GAME, THUS FIND THE CHALLENGER (AGAIN)
-//						HashMap<String, String> challengePartners = server.getChallengePartners();
-//						String nameChallenger = challengePartners.get(nameChallenged);
-//						ClientHandler temp = searchClientHandlerByName(nameChallenger);
 						ClientHandler clientHandlerChallenger = clientHandler.getClientHandlerOpponent();
 						String nameChallenger = clientHandlerChallenger.getClientName();
 						logger.log(Level.INFO, "\nGame started by challenge player " + namePlayer + " (" + mark +") against " + nameChallenger + 
@@ -243,6 +235,16 @@ public class NetworkIOParser implements Constants4 {
 						
 						clientHandler.sendGameStartToServer(nameChallenger, nameChallenged, boardDimension, BLACK, clientHandlerChallenger);
 					}
+//				} else if (amountArgs == 4) {
+//					//THIS IS THE CASE WHEN A COMPUTER STRATEGY IS INPUTTED
+//					String namePlayer = stringParts[1];
+//					nameChallenged = clientHandler.getClientName();
+//					int boardDimension = Integer.parseInt(stringParts[2]);
+//					String mark = stringParts[3];
+//					String chosenStrategy = stringParts[4];
+//					nameChallenger = clientHandler.getClientName().trim(); 
+//					nameChallenged = namePlayer;
+//					clientHandler.sendGameStartToServer(nameChallenger, nameChallenged, 9, BLACK, clientHandler);
 				} else {
 					// Do Nothing
 					clientHandler.sendMessageToClient(FAILURE + DELIMITER + ARGUMENTSMISSING);
@@ -346,9 +348,11 @@ public class NetworkIOParser implements Constants4 {
 			break;
 		case GETHINT:
 			//TODO GET THE HINT COMMAND
-			if(isPlaying) {
-				clientHandler.sendMessageToClient(CHAT + DELIMITER + "Hint by server: \n");
-				clientHandler.sendMessageToClient(HINT + DELIMITER + "5, 5");
+			if(this.isPlaying) {
+				Board currentBoard = clientHandler.getCurrentGameServer().getCurrentGame().getCurrentBoard();
+				Strategy randomStrategy = new RandomStrategy(); 
+				int index = randomStrategy.determineMove(currentBoard, clientHandler.getLastMark());
+				clientHandler.sendMessageToClient(HINT + DELIMITER + currentBoard.getRow(index) + DELIMITER + currentBoard.getCol(index));
 			} else {
 				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
 			}
@@ -403,8 +407,9 @@ public class NetworkIOParser implements Constants4 {
 
 				//				break;
 			} else if (this.isWaitingOnRandomPlay) {
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "You are back in the lobby!");
 				clientHandler.setIsInLobby(true);
-				clientHandler.setIsWaitingOnTurn(false);
+				clientHandler.setIsWaitingForRandomPlay(false);
 				// TODO: AND LET THE SERVER KNOW THE PLAYING STATUS IS RETRACTED
 			} else if (this.isObserving) {
 				clientHandler.setIsObserving(false);
@@ -414,11 +419,12 @@ public class NetworkIOParser implements Constants4 {
 			} else if (this.isPlaying) {
 				// Step 1: PERSON SENDING QUIT
 				clientHandler.sendMessageToClient("Quiting game...");
+				clientHandler.getCurrentGameServer().getCurrentGame().closeGame();
 				// Step 2: SENDING QUIT TO OPPONENT, is that opponent is still playing 
-				if (clientHandler.getClientHandlerOpponent().getIsPlaying()) {
-					clientHandler.getClientHandlerOpponent().sendMessageToClient("Opponent has quit the game");
-					clientHandler.getClientHandlerOpponent().sendMessageToServer(CANCEL);	
-				}
+//				if (clientHandler.getClientHandlerOpponent().getIsPlaying()) {
+//					clientHandler.getClientHandlerOpponent().sendMessageToClient("Opponent has quit the game");
+//					clientHandler.getClientHandlerOpponent().sendMessageToServer(CANCEL);	
+//				}
 				clientHandler.setIsPlaying(false);
 				clientHandler.setIsInLobby(true);
 			} else if (this.isObserving) {
@@ -748,16 +754,25 @@ public class NetworkIOParser implements Constants4 {
 		case COMPUTERPLAYER: d = 1; break; //COMPUTERPLAYER";
 		//			case BOARDSIZES: d = 1; break; //BOARDSIZES";
 		case PRACTICE: 
+			
 			// TODO: Prio2. Get the strategies right (parsing and shit)
-			if (this.isPlaying || this.isPendingChallenge) {
+			if (this.isPlaying || this.isPendingChallenge || this.isAlreadyChallenged || this.isObserving || this.isWaitingOnRandomPlay) {
 				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
 				break;
 			} else {
-				//			outputCommand = GAMESTART;
-				nameChallenged = COMPUTER; 
-				String gameArgs = nameChallenged + DELIMITER + BOARDSIZE + DELIMITER + BLACK;
-				//			clientHandler.sendMessageToClient(GAMESTART + DELIMITER + gameArgs);
-				clientHandler.sendMessageToServer(GAMESTART + DELIMITER + gameArgs);
+				if (amountArgs == 0) {
+					clientHandler.sendMessageToClient(AVAILABLESTRATEGIES + DELIMITER + RANDOMSTRATEGY + DELIMITER + CUTTINGSTRATEGY + DELIMITER + MIRRORSTRATEGY + DELIMITER + SMARTSTRATEGY);
+				} else if (amountArgs == 1) {
+					String chosenStrategy = stringParts[1].trim();
+					nameChallenged = COMPUTER; 
+					clientHandler.setChosenStrategy(stringParts[1]);
+					String gameArgs = nameChallenged + DELIMITER + BOARDSIZE + DELIMITER + BLACK + DELIMITER + chosenStrategy;
+					//			clientHandler.sendMessageToClient(GAMESTART + DELIMITER + gameArgs);
+					clientHandler.sendMessageToServer(GAMESTART + DELIMITER + gameArgs);
+				} else {
+					clientHandler.sendMessageToClient(FAILURE + DELIMITER + ILLEGALARGUMENT);
+				}
+				
 				break; //PRACTICE";
 			}
 			//		case COMPUTER: d = 1; break; //COMPUTER";

@@ -11,17 +11,21 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import go_game.ComputerPlayer;
+import go_game.CuttingStrategy;
 //import go_game.ClientHandler;
 import go_game.Game;
 import go_game.HumanPlayer;
 import go_game.Mark;
+import go_game.MirrorStrategy;
 import go_game.Player;
 import go_game.RandomStrategy;
+import go_game.SmartStrategy;
 import go_game.Strategy;
+import go_game.protocol.AdditionalConstants;
 import go_game.protocol.Constants3;
 import go_game.protocol.Constants4;
 
-public class GoGameServer extends Thread implements Constants4, Observer {
+public class GoGameServer extends Thread implements Constants4, Observer, AdditionalConstants {
 
 	// Instance variables
 	private Player p1;
@@ -38,9 +42,9 @@ public class GoGameServer extends Thread implements Constants4, Observer {
 
 	// Observers for a game
 	private List<ClientHandler> observers = new ArrayList<ClientHandler>();
-	
+
 	// Thread observer class
-//	private ServerThreadObserver mServerThreadObserver;
+	//	private ServerThreadObserver mServerThreadObserver;
 	private Logger logger;
 
 	// Constructor
@@ -63,13 +67,29 @@ public class GoGameServer extends Thread implements Constants4, Observer {
 		// Create players :
 		// PLAYER 1 IS ALWAYS A HUMAN
 		p1 = new HumanPlayer(nameChallenger, markChallenger, clientHandlerP1);
+		clientHandlerP1.setLastMark(Mark.BB);
 
 		// PLAYER 2 can be human or computer, depending on the parsed information
 		if (nameChallenged.equals(COMPUTER)) {
-			Strategy strategy = new RandomStrategy();
+			String chosenStrategy = clientHandlerP1.getChosenStrategy();
+			Strategy strategy;
+			switch (chosenStrategy) {
+			case CUTTINGSTRATEGY:
+				strategy = new CuttingStrategy(); break;
+			case MIRRORSTRATEGY:
+				strategy = new MirrorStrategy(); break;
+			case RANDOMSTRATEGY:
+				strategy = new RandomStrategy(); break;
+			case SMARTSTRATEGY:
+				strategy = new SmartStrategy(); break;
+			default:
+				strategy = new RandomStrategy(); break;
+			}
 			p2 = new ComputerPlayer(markChallenged, strategy);
+			clientHandlerP1.sendMessageToClient(CHAT + DELIMITER + "Computer player created using a " + strategy.getName());
 		} else {
 			p2 = new HumanPlayer(nameChallenged, markChallenged, clientHandlerP2);
+			clientHandlerP2.setLastMark(Mark.WW);
 		}
 		dim = boardDim;
 
@@ -93,8 +113,8 @@ public class GoGameServer extends Thread implements Constants4, Observer {
 		// Working on same thread as this GoGameServer
 		game.start();
 
-//		String helloBoard = CHAT + DELIMITER + "\nNew board (or 'Goban') of dimensions " + dim + " X " +  dim + " created...\n";
-//		sendMessageBoth(helloBoard);
+		//		String helloBoard = CHAT + DELIMITER + "\nNew board (or 'Goban') of dimensions " + dim + " X " +  dim + " created...\n";
+		//		sendMessageBoth(helloBoard);
 		if (game.getGameHasEnded()) {
 			System.out.println("Closing gamethread \n");
 		}
@@ -105,17 +125,17 @@ public class GoGameServer extends Thread implements Constants4, Observer {
 		clientHandlerP2.sendMessageToClient(msg);
 	}
 
-//	public void sendMessageToObservers(String msg) {
-//		//		System.out.println("Amount observers sent: " + observers.size() +"\n");
-//		if(msg.equals(STOPGAME)) {
-//			
-//			
-//		} else {
-//			// Send the message to the observers
-//			sentMessageToObservers(msg);
-//		}
-//
-//	}
+	//	public void sendMessageToObservers(String msg) {
+	//		//		System.out.println("Amount observers sent: " + observers.size() +"\n");
+	//		if(msg.equals(STOPGAME)) {
+	//			
+	//			
+	//		} else {
+	//			// Send the message to the observers
+	//			sentMessageToObservers(msg);
+	//		}
+	//
+	//	}
 
 	protected void sendMessageToObservers(String msg) {
 		if (observers.size() > 0) {
@@ -124,7 +144,7 @@ public class GoGameServer extends Thread implements Constants4, Observer {
 			}
 		}
 	}
-	
+
 	protected void sentMessageToObserversServer(String msg) {
 		if (observers.size() > 0) {
 			for (ClientHandler currentObserver : observers) {
@@ -152,29 +172,29 @@ public class GoGameServer extends Thread implements Constants4, Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-			
+
 		if(arg.equals(STOPGAME)) {
-				
+
 			// Close the game
-			
-//						clientHandlerP1.sendMessageToClient(GAMEOVER);
-						clientHandlerP1.sendMessageToServer(STOPGAME);
-//						clientHandlerP1.sendMessageToClient(GAMEOVER);
-//						clientHandlerP2.sendMessageToClient(GAMEOVER);
-						clientHandlerP2.sendMessageToServer(STOPGAME);
-//						clientHandlerP2.sendMessageToClient(GAMEOVER);
-						clientHandlerP1.setIsWaitingOnTurn(false);
-						clientHandlerP2.setIsWaitingOnTurn(false);
-						
-						// Disconnect the observers
-						sendMessageToObservers(CHAT + DELIMITER + "The move took to long and the game is forfeited, going back to the lobby. \n");
-						sentMessageToObserversServer(STOPGAME);
-//						sendMessageToObservers(GAMEOVER);
-						
-						// End the gamethread
-						logger.log(Level.INFO, "Game thread of " +clientHandlerP1.getClientName()+ " vs " +clientHandlerP2.getClientName()+"is interrupted");
-						this.interrupt();
-						
+
+			//						clientHandlerP1.sendMessageToClient(GAMEOVER);
+			clientHandlerP1.sendMessageToServer(STOPGAME);
+			//						clientHandlerP1.sendMessageToClient(GAMEOVER);
+			//						clientHandlerP2.sendMessageToClient(GAMEOVER);
+			clientHandlerP2.sendMessageToServer(STOPGAME);
+			//						clientHandlerP2.sendMessageToClient(GAMEOVER);
+			clientHandlerP1.setIsWaitingOnTurn(false);
+			clientHandlerP2.setIsWaitingOnTurn(false);
+
+			// Disconnect the observers
+			sendMessageToObservers(CHAT + DELIMITER + "The move took to long and the game is forfeited, going back to the lobby. \n");
+			sentMessageToObserversServer(STOPGAME);
+			//						sendMessageToObservers(GAMEOVER);
+
+			// End the gamethread
+			logger.log(Level.INFO, "Game thread of " +clientHandlerP1.getClientName()+ " vs " +clientHandlerP2.getClientName()+"is interrupted");
+			this.interrupt();
+
 		} else if (arg.equals("TURNSWITCH")) {
 			clientHandlerP1.setIsWaitingOnTurn(!clientHandlerP1.getIsWaitingOnTurn());
 			clientHandlerP2.setIsWaitingOnTurn(!clientHandlerP1.getIsWaitingOnTurn());

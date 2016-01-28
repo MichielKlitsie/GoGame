@@ -269,7 +269,7 @@ public class Game extends Observable implements Constants4 {
 		players[(current + 1) % 2].sentMessage(TIMEOUTEXCEEDED);
 	}
 
-	private void closeGame() {
+	public void closeGame() {
 		//		System.out.println("Kom ik bij de close game?");
 		this.doorgaan = false;
 		setChanged();

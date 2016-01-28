@@ -42,7 +42,7 @@ public class SmartStrategy implements Strategy {
 	 * 
 	 */
 	public SmartStrategy() {
-		this.nameStrategy = "Smart";
+		this.nameStrategy = "Smart strategy";
 		this.winningMove = 0;
 	}
 

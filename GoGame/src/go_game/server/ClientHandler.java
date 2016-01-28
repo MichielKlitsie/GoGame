@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import go_game.Board;
 import go_game.Game;
 import go_game.Mark;
+import go_game.protocol.AdditionalConstants;
 import go_game.protocol.Constants2;
 import go_game.protocol.Constants3;
 import go_game.protocol.Constants4;
@@ -25,7 +26,7 @@ import go_game.protocol.Constants4;
  * @author  Michiel Klitsie
  * @version $Revision: 1.1 $
  */
-public class ClientHandler extends Thread implements Constants4 {
+public class ClientHandler extends Thread implements Constants4, AdditionalConstants {
 	// Instance variables -------------------------------------------------------------
 	private Server server;
 	private BufferedReader in;
@@ -50,7 +51,8 @@ public class ClientHandler extends Thread implements Constants4 {
 	private boolean isWaitingForRandomPlay;
 	private boolean isInWaitingRoom;
 
-
+	// Chosen strategy
+	private String chosenStrategy;
 
 	// Keep track of making a move
 	private int[] lastMove = {-999, -999};
@@ -60,42 +62,10 @@ public class ClientHandler extends Thread implements Constants4 {
 	private ServerTimer serverTimer;
 	private int timeOutServer = 3000;
 
-	// OPTIONS MENUs corresponding to different states
-	// TODO: FINALIZE THE OPTION MENUS
-	private String optionsMenuLobby = "Options menu lobby:\n" +
-			"1. PLAY: Play a game agains a random person.\n" + 
-			"2. CHALLENGE/AVAILABLEPLAYERS: Get a list of the people in the lobby.\n" +
-			"3. CHALLENGE <namePlayer>: Challenge a specific player in the lobby.\n" +
-			"4. PRACTICE: Practice against a computer player.\n" +
-			"5. CHAT: Send a message to the players in the lobby.\n" +
-			"6. CURRENTGAMES: Get a list of the people playing a game. \n" +
-			"7. GETSTATUS: Get your current status. \n" +
-			"x. GETOPTIONS: Get this options menu.\n";
-	private String optionsMenuPlaying = "Options menu playing:\n" +
-			"1. MOVE: Play a move in the game. Input as 'MOVE int row, int column', 'MOVE char row, int column', 'MOVE index' or 'MOVE PASS'.\n" + 
-			"2. PASS: Challenge a specific player.\n" + 
-			"5. CHAT: Send a message to the opponent players.\n" +
-			"4. ...: ....\n" + 
-			"x. GETOPTIONS: Get this options menu.\n";
-	private String optionsMenuPendingChallenge = "Options menu pending challenge:\n" +
-			"5. CHAT: Send a message to the players in the lobby.\n" +
-			"6. CURRENTGAMES: Get a list of the people playing a game. \n" +
-			"x. GETOPTIONS: Get this options menu.\n";
-	private String optionsMenuWaitingOnMove = "Options menu waiting on move:\n" +
-			"5. CHAT: Send a message to the opponent players.\n" +
-			"x. GETOPTIONS: Get this options menu.\n";
-	private String optionsMenuObserving = "Options menu observing:\n" +
-			"5. CHAT: Send a message to the playing players.\n" +
-			"x. GETOPTIONS: Get this options menu.\n";
-	private String optionsMenuIsInWaitingRoom = "Options menu waiting room:\n" +
-			"1. NEWPLAYER <name>: Set a new name.\n" +
-			"2. QUIT: Exit the server.\n" +
-			"x. GETOPTIONS: Get this options menu.\n";
-
 	// OBSERVER 
 	private GoGameServer observeGoGameServer;
 	private Socket sock;
-	
+	private Mark lastMark;
 
 	// Constructor ----------------------------------------------------------------
 
@@ -123,14 +93,10 @@ public class ClientHandler extends Thread implements Constants4 {
 		setIsWaitingOnTurn(false);
 		setIsAlreadyChallenged(false);
 		setIsObserving(false);
-		setWaitingForRandomPlay(false);
+		setIsWaitingForRandomPlay(false);
 		setIsInWaitingRoom(true);
 
 		// Get the name
-		//		String inputCommando = in.readLine();
-		//		clientName = inputCommando.split(DELIMITER)[1];
-		//		mNetworkIOParser.parseInput(inputCommando);
-		//		clientName = newName;
 		clientName = "Anonymous";
 
 		// Add to the thread observer
@@ -138,6 +104,9 @@ public class ClientHandler extends Thread implements Constants4 {
 
 		// Set the server timer
 		serverTimer = new ServerTimer(this.timeOutServer, this);
+		
+		// Set the default strategy
+		chosenStrategy = RANDOMSTRATEGY;
 	}
 
 
@@ -308,11 +277,11 @@ public class ClientHandler extends Thread implements Constants4 {
 		// Change state of clientHandler of the challenged and the challenger
 		setIsPlaying(true);
 		setIsInLobby(false);
-		setWaitingForRandomPlay(false);
+		setIsWaitingForRandomPlay(false);
 		setPendingChallengeStatus(false);
 		clientHandlerChallenger.setIsPlaying(true); 
 		clientHandlerChallenger.setIsInLobby(false);
-		clientHandlerChallenger.setWaitingForRandomPlay(false);
+		clientHandlerChallenger.setIsWaitingForRandomPlay(false);
 		clientHandlerChallenger.setPendingChallengeStatus(false);
 		
 		// And let the server create a new thread which executes the game with the corresponding sockets used for communication
@@ -408,27 +377,27 @@ public class ClientHandler extends Thread implements Constants4 {
 
 	// GETTERS AND SETTERS ------------------------------------------------
 	public String getOptionsLobby() {
-		return this.optionsMenuLobby;
+		return this.OPTIONSMENULOBBY;
 	}
 
 	public String getOptionsGame() {
-		return this.optionsMenuPlaying;
+		return this.OPTIONSMENUPLAYING;
 	}
 
 	public String getOptionsPendingChallenge() {
-		return this.optionsMenuPendingChallenge;
+		return this.OPTIONSMENUPENDINGCHALLENGE;
 	}
 
 	public String getOptionsWaitingOnMove() {
-		return this.optionsMenuWaitingOnMove;
+		return this.OPTIONSMENUWAITINGMOVE;
 	}
 
 	public String getOptionsObserving() {
-		return this.optionsMenuObserving;
+		return this.OPTIONSMENUOBSERVING;
 	}
 
 	public String getOptionsIsInWaitingRoom() {
-		return this.optionsMenuIsInWaitingRoom;
+		return this.OPTIONSMENUWAITINGROOM;
 	}
 	
 	/**
@@ -490,7 +459,7 @@ public class ClientHandler extends Thread implements Constants4 {
 	}
 
 
-	public void setWaitingForRandomPlay(boolean isWaitingForRandomPlay) {
+	public void setIsWaitingForRandomPlay(boolean isWaitingForRandomPlay) {
 		this.isWaitingForRandomPlay = isWaitingForRandomPlay;
 	}
 
@@ -597,6 +566,20 @@ public class ClientHandler extends Thread implements Constants4 {
 
 	}
 
+	public String getChosenStrategy() {
+		return chosenStrategy;
+	}
 
+
+	public void setChosenStrategy(String chosenStrategy) {
+		this.chosenStrategy = chosenStrategy;
+	}
+
+	public void setLastMark(Mark mark) {
+		this.lastMark = mark;
+	}
 	
+	public Mark getLastMark() {
+		return this.lastMark;
+	}
 }
