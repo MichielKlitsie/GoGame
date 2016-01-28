@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import go_game.ComputerPlayer;
 //import go_game.ClientHandler;
@@ -39,6 +41,7 @@ public class GoGameServer extends Thread implements Constants4, Observer {
 	
 	// Thread observer class
 //	private ServerThreadObserver mServerThreadObserver;
+	private Logger logger;
 
 	// Constructor
 	public GoGameServer(String nameChallenger, String nameChallenged, int boardDim, String strMarkChallenger,
@@ -46,6 +49,7 @@ public class GoGameServer extends Thread implements Constants4, Observer {
 			ClientHandler clientHandlerP1, ClientHandler clientHandlerP2) {
 		//Name
 		super("ThreadGoGame");
+		this.logger = Server.LOGGER;
 
 		// Set the string 'BLACK' to the correct corresponding MARK
 		if(strMarkChallenger.trim().equals(BLACK)) {
@@ -75,6 +79,8 @@ public class GoGameServer extends Thread implements Constants4, Observer {
 
 		//Add the thread to the observer class
 		clientHandlerP1.getServer().getServerThreadObserver().addGameThread(this);
+		clientHandlerP1.setIsWaitingOnTurn(true);
+		clientHandlerP2.setIsWaitingOnTurn(false);
 	}
 
 	public void run() {	
@@ -146,29 +152,34 @@ public class GoGameServer extends Thread implements Constants4, Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-		System.out.println("Kom ik bij de observer update?");	
+			
 		if(arg.equals(STOPGAME)) {
-			System.out.println("Kom ik bij de observer update die het spel sluit??");	
+				
 			// Close the game
 			
-						clientHandlerP1.sendMessageToClient(STOPGAME);
+//						clientHandlerP1.sendMessageToClient(GAMEOVER);
 						clientHandlerP1.sendMessageToServer(STOPGAME);
 //						clientHandlerP1.sendMessageToClient(GAMEOVER);
-						clientHandlerP2.sendMessageToClient(STOPGAME);
+//						clientHandlerP2.sendMessageToClient(GAMEOVER);
 						clientHandlerP2.sendMessageToServer(STOPGAME);
 //						clientHandlerP2.sendMessageToClient(GAMEOVER);
+						clientHandlerP1.setIsWaitingOnTurn(false);
+						clientHandlerP2.setIsWaitingOnTurn(false);
 						
 						// Disconnect the observers
 						sendMessageToObservers(CHAT + DELIMITER + "The move took to long and the game is forfeited, going back to the lobby. \n");
 						sentMessageToObserversServer(STOPGAME);
-						sendMessageToObservers(GAMEOVER);
+//						sendMessageToObservers(GAMEOVER);
 						
 						// End the gamethread
-						System.out.println("Thread is interrupted");
+						logger.log(Level.INFO, "Game thread of " +clientHandlerP1.getClientName()+ " vs " +clientHandlerP2.getClientName()+"is interrupted");
 						this.interrupt();
 						
+		} else if (arg.equals("TURNSWITCH")) {
+			clientHandlerP1.setIsWaitingOnTurn(!clientHandlerP1.getIsWaitingOnTurn());
+			clientHandlerP2.setIsWaitingOnTurn(!clientHandlerP1.getIsWaitingOnTurn());
 		} else {
-			sendMessageToObservers(arg + "\n");
+			sendMessageToObservers(arg + "");
 		}
 	}
 

@@ -3,6 +3,7 @@ package go_game.server;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -169,11 +170,32 @@ public class NetworkIOParser implements Constants4 {
 					clientHandler.sendMessageToClient(WAITFOROPPONENT);
 					clientHandler.setWaitingForRandomPlay(true);
 					clientHandler.setIsInLobby(false);
+					server.broadcast(CHAT + DELIMITER + "[" + clientHandler.getClientName() + " is waiting on somebody to write 'PLAY']\n");
 				} else {
-					ClientHandler clientHandlerOpponent = listOfPlayersWaiting.get(0);
-					String nameChallenged = clientHandlerOpponent.getClientName();
+					// LAST ONE REACTING IS SEEN AS HE WHO IS CHALLENGED
+					ClientHandler clientHandlerOpponent = listOfPlayersWaiting.get(0);				
+					String nameChallenged = clientHandler.getClientName().trim();
+					String nameChallenger = clientHandlerOpponent.getClientName().trim();
+					// Set them as a duo
+					// ... and set the duo on the list on the server
+					server.addChallengePartners(clientHandler.getClientName(), clientHandlerOpponent.getClientName());
+					
+					// GAMESTART PERSON CHALLENGED
 					String gameArgs = nameChallenged + DELIMITER + BOARDSIZE + DELIMITER + WHITE; 
 					clientHandler.sendMessageToClient(GAMESTART + DELIMITER + gameArgs);
+//					clientHandler.setWaitingForRandomPlay(false);
+					clientHandler.setClientHandlerOpponent(clientHandlerOpponent);
+
+					// GAMESTART CHALLENGER
+					String gameArgs2 = nameChallenger + DELIMITER + BOARDSIZE + DELIMITER + BLACK; 
+					clientHandlerOpponent.sendMessageToClient(GAMESTART + DELIMITER + gameArgs2);
+//					clientHandlerOpponent.setPendingChallengeStatus(false);
+//					clientHandlerOpponent.setWaitingForRandomPlay(false);
+					
+					// So the person already waiting can find
+//					String gameArgs = clientHandlerOpponent.getClientName().trim() + DELIMITER + BOARDSIZE + DELIMITER + WHITE; 
+
+					// GAMESTART TO SERVER FROM THE PERSON CHALLENGED
 					clientHandler.sendMessageToServer(GAMESTART + DELIMITER + gameArgs);
 				}				
 				break;
@@ -197,12 +219,12 @@ public class NetworkIOParser implements Constants4 {
 			} else {
 				if (amountArgs == 3) {
 					// Parse arguments
-					String namePlayer = stringParts[1];
+					
+					nameChallenged = clientHandler.getClientName();
 					int boardDimension = Integer.parseInt(stringParts[2]);
 					String mark = stringParts[3];
-					logger.log(Level.INFO, "\nGame started by challenge player " + namePlayer + 
-							" on a board of size " + boardDimension + " as mark " + mark);
-
+					
+					String namePlayer = stringParts[1];
 					if (namePlayer.equals(COMPUTER)) {
 						// Set a computer player
 						// Instead of using the clientHandler from the other player, the last input is the players own clientHandler
@@ -211,17 +233,15 @@ public class NetworkIOParser implements Constants4 {
 						clientHandler.sendGameStartToServer(nameChallenger, nameChallenged, 9, BLACK, clientHandler);
 					} else {
 						// RESPONSIBILITY ON THE CHALLENGED SIDE TO START THE GAME, THUS FIND THE CHALLENGER (AGAIN)
-						List<ClientHandler> availablePlayers = this.server.getAllPlayers();
-						ClientHandler temp = searchClientHandlerByName(nameChallenger);
-						clientHandler.sendGameStartToServer(nameChallenger, nameChallenged, 9, BLACK, temp);
-						//						outerloop:
-						//							for (ClientHandler temp : availablePlayers) {
-						//								// temp is the challenger
-						//								if(temp.getClientName().trim().equals(nameChallenger)) {
-						//									clientHandler.sendGameStartToServer(nameChallenger, nameChallenged, 9, BLACK, temp);
-						//									break outerloop;
-						//								}
-						//							}
+//						HashMap<String, String> challengePartners = server.getChallengePartners();
+//						String nameChallenger = challengePartners.get(nameChallenged);
+//						ClientHandler temp = searchClientHandlerByName(nameChallenger);
+						ClientHandler clientHandlerChallenger = clientHandler.getClientHandlerOpponent();
+						String nameChallenger = clientHandlerChallenger.getClientName();
+						logger.log(Level.INFO, "\nGame started by challenge player " + namePlayer + " (" + mark +") against " + nameChallenger + 
+								" on a board of size " + boardDimension + ".");
+						
+						clientHandler.sendGameStartToServer(nameChallenger, nameChallenged, boardDimension, BLACK, clientHandlerChallenger);
 					}
 				} else {
 					// Do Nothing
@@ -450,10 +470,15 @@ public class NetworkIOParser implements Constants4 {
 
 			// Get if the player is in the lobby or playing a game...
 			if(this.isInLobby) {
-				server.broadcast(chatMessage);
+				server.broadcastInLobby(chatMessage);
 			} else if (this.isPlaying) {
 				// GET THE OPPONENT
-				clientHandler.getClientHandlerOpponent().sendMessageToClient(chatMessage);
+//				clientHandler.getClientHandlerOpponent().sendMessageToClient(chatMessage);
+				clientHandler.getCurrentGameServer().sendMessageBoth(chatMessage);
+				clientHandler.getCurrentGameServer().sendMessageToObservers(chatMessage);
+			} else if (this.isObserving) {
+				clientHandler.getObservedGameServer().sendMessageBoth(chatMessage);
+				clientHandler.getObservedGameServer().sendMessageToObservers(chatMessage);
 			}
 			break;
 
@@ -554,17 +579,17 @@ public class NetworkIOParser implements Constants4 {
 				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
 				break;
 			} else {
-				if (this.isPendingChallenge) {
-					// This client must be the challenger and get the message from the server
-
-					// REMOVE self from lobby list
-					// GAMESTART
-					System.out.println("Oh jeahhhhh");
-					String nameChallenger = clientHandler.getClientName().trim(); 
-					String gameArgs = nameChallenger + DELIMITER + BOARDSIZE + DELIMITER + BLACK; 
-					//					clientHandler.sendMessageToClient(GAMESTART + DELIMITER + gameArgs);
-					//
-				} else {
+//				if (this.isPendingChallenge) {
+//					// This client must be the challenger and get the message from the server
+//
+//					// REMOVE self from lobby list
+//					// GAMESTART
+//					System.out.println("Oh jeahhhhh");
+//					String nameChallenger = clientHandler.getClientName().trim(); 
+//					String gameArgs = nameChallenger + DELIMITER + BOARDSIZE + DELIMITER + BLACK; 
+//					//					clientHandler.sendMessageToClient(GAMESTART + DELIMITER + gameArgs);
+//					//
+//				} else {
 					// THIS IS WHAT ACTUALLY HAPPENS 
 
 					// This client must be the one challenged and in response sending the CHALLENGE ACCEPTED to the server
@@ -574,37 +599,33 @@ public class NetworkIOParser implements Constants4 {
 					nameChallenger = challengePartners.get(nameChallenged);
 					List<ClientHandler> availablePlayers = this.server.getAllPlayers();
 					outerloop:
-						for (ClientHandler temp : availablePlayers) {
+						for (ClientHandler clientHandlerOpponent : availablePlayers) {
 							// temp is the challenger
-							if(temp.getClientName().trim().equals(nameChallenger)) {
-								logger.log(Level.INFO, "Starting match with " + temp.getClientName());
+							if(clientHandlerOpponent.getClientName().trim().equals(nameChallenger)) {
+								logger.log(Level.INFO, "Starting match with " + clientHandlerOpponent.getClientName());
 
 								//Send message to the challenger
-								temp.sendMessageToClient(CHALLENGEACCEPTED);
-								//								temp.sendMessageToClient("\nThe challenge has been accepted, get ready for the match!");
+								clientHandlerOpponent.sendMessageToClient(CHALLENGEACCEPTED);
 
 								// BROADCAST TO PEOPLE IN LOBBY TWO PLAYERS ARE LEAVING LOBBY TO PLAY A GAME
 								server.broadcast(CHAT + DELIMITER + "[" + nameChallenger + " and " + nameChallenged + " are leaving the lobby to play a game]\n");
-								//								clientHandler.setIsPlaying(true);
-								//								clientHandler.setIsInLobby(false);
 
 								// GAMESTART PERSON CHALLENGED
-								//								System.out.println(clientHandler.getClientName() + ": Challenge status - " + this.isPendingChallenge);
 								String gameArgs = nameChallenged + DELIMITER + BOARDSIZE + DELIMITER + WHITE; 
 								clientHandler.sendMessageToClient(GAMESTART + DELIMITER + gameArgs);
+								clientHandler.setClientHandlerOpponent(clientHandlerOpponent);
 
 								// GAMESTART CHALLENGER
-								//								System.out.println(temp.getClientName() + ": Challenge status" + temp.getPendingChallengeStatus());
 								String gameArgs2 = nameChallenger + DELIMITER + BOARDSIZE + DELIMITER + BLACK; 
-								temp.sendMessageToClient(GAMESTART + DELIMITER + gameArgs2);
-								temp.setPendingChallengeStatus(false);
+								clientHandlerOpponent.sendMessageToClient(GAMESTART + DELIMITER + gameArgs2);
+								clientHandlerOpponent.setPendingChallengeStatus(false);
 
 								// GAMESTART TO SERVER FROM THE PERSON CHALLENGED
 								clientHandler.sendMessageToServer(GAMESTART + DELIMITER + gameArgs);
 
 								break outerloop;
 							}
-						}
+//						}
 				}
 				break; 
 			}
@@ -670,7 +691,8 @@ public class NetworkIOParser implements Constants4 {
 						// And check if the player is currently playing a game
 						ClientHandler observedPlayer = searchClientHandlerByName(namePlayer);
 						if (observedPlayer.getIsPlaying()) {
-							String messageObserveGame = OBSERVEDGAME + DELIMITER + WHITE + DELIMITER + "blaWhite" + DELIMITER + BLACK + DELIMITER + "blaBlack " + DELIMITER + "Board size: "+ BOARDSIZE + DELIMITER + "Board: \n";
+							Player[] observedPlayers = observedPlayer.getCurrentGameServer().getCurrentGame().getPlayers();
+							String messageObserveGame = OBSERVEDGAME + DELIMITER + WHITE + DELIMITER + observedPlayers[1].getName() + DELIMITER + BLACK + DELIMITER + observedPlayers[0].getName() + DELIMITER + "Board size: " + BOARDSIZE;
 							clientHandler.sendMessageToClient(messageObserveGame);
 							//								clientHandler.sendMessageToClient("Observering game of " + namePlayer);
 							clientHandler.setIsObserving(true);
@@ -699,13 +721,21 @@ public class NetworkIOParser implements Constants4 {
 				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
 				break;
 			} else {
-				List<ClientHandler> listOfPlayersPlaying = getListOfPlayersPlaying();
-				String strListPlaying = "";
-				if (listOfPlayersPlaying.size() == 0) {
+//				List<ClientHandler> listOfPlayersPlaying = getListOfPlayersPlaying();
+//				String strListPlaying = "";
+				Set<GoGameServer> games = server.getServerThreadObserver().getGameThreads();
+				if (games.size() == 0) {
 					clientHandler.sendMessageToClient(NOGAMESPLAYING);
 				} else {
-					strListPlaying = createStringOfListPlayers(listOfPlayersPlaying);
-					clientHandler.sendMessageToClient(CURRENTGAMES + DELIMITER + strListPlaying);
+//					strListPlaying = createStringOfListPlayers(listOfPlayersPlaying);
+					String s = "\n";
+					int i = 1;
+					for (GoGameServer game : games) {
+						s = s + i + ". " + game.getName() + ": " + game.getCurrentGame().getPlayers()[0].getName() + " (Black) vs. " + game.getCurrentGame().getPlayers()[1].getName() + " (White) \n";
+						i++;
+					}
+					clientHandler.sendMessageToClient(CURRENTGAMES + DELIMITER + s);
+					
 				}
 
 				break;

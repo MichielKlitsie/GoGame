@@ -57,4 +57,12 @@ public enum Mark implements Constants4 {
             return E;
         }
     }
+    
+    public String toStringForProtocolFull() {
+    	if (this == WW) {
+            return WHITE;
+        } else {
+            return BLACK;
+        }
+    }
 }

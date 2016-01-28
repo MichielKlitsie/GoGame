@@ -23,11 +23,6 @@ public class Game extends Observable implements Constants4 {
 
 	public static final int NUMBER_PLAYERS = 2;
 
-	// Scanner for input line, to be used accross all classes
-	//	public static final Scanner line = new Scanner(System.in);
-	//	private ClientHandler clientHandlerP1;
-	//	private ClientHandler clientHandlerP2;
-
 	/*@
        private invariant board != null;
 	 */
@@ -56,6 +51,18 @@ public class Game extends Observable implements Constants4 {
 	private boolean isGameOver;	
 	private boolean prematurelyQuit;
 	private boolean doorgaan = true;
+	private int[] lastMove = {-999, -999};
+	private boolean isValidMove;
+	private int choice;
+
+	public int[] getLastMove() {
+		return this.lastMove;
+	}
+
+	public void setLastMove(int lastXco, int lastYco) {
+		this.lastMove[0] = lastXco;
+		this.lastMove[1] = lastYco;
+	}
 
 	// -- Constructors -----------------------------------------------
 
@@ -77,8 +84,8 @@ public class Game extends Observable implements Constants4 {
 
 		// Set the players in an array, to make switching easy
 		players = new Player[NUMBER_PLAYERS];
-		players[0] = s0;
-		players[1] = s1;
+		players[0] = s0; //BLACK
+		players[1] = s1; //WHITE
 
 		// Game states and stuff
 		current = 0;
@@ -111,7 +118,7 @@ public class Game extends Observable implements Constants4 {
 			reset();
 			play();
 			//			doorgaan = readBoolean(CHAT + DELIMITER + "\n> Play another time? (y/n)?", "y", "n");
-//			System.out.println("Start loop has ended");
+			//			System.out.println("Start loop has ended");
 			closeGame();
 		}
 	}
@@ -162,57 +169,55 @@ public class Game extends Observable implements Constants4 {
 	 */
 	private void play() {
 		// Show the first empty board
-		this.gameUpdate();
+//		sendBoardProtocol();
 
 		// Loop through the moves, the actual game
-		//    	while (!this.board.gameOver()) {
 		gameloop:
 			while (!isGameOver) {
 				// Step 0:  Before playing, add a string representation of the board to the hashset
 				this.board.addPreviousBoard(board.deepCopy());
+				sendBoardProtocol();
 
 				// Step 1: Send the messages to the current players
-				players[current].sentMessage(CHAT + DELIMITER + "Your turn\n");
+				
 				//			players[(current + 1) % 2].sentMessage(WAITFOROPPONENT);
-				
+
 				// Step 2: Keep trying to make moves until a valid move is made
-				boolean isValidMove = false;
-				int choice = -999;
-				
-				players[(current + 1) % 2].sentMessage(CHAT + DELIMITER + "Wait until opponent made his choice.\n");
-
-				// Start a game timer
+				isValidMove = false;
+				choice = -999;
+			
+				// Step 3: Start a game timer
 				GameTimer gameTimer = new GameTimer(TIMEOUTSECONDS, players[current]);
-//				GameTimer gameTimer = new GameTimer(10, players[current]);
 
-				
-					while(!isValidMove) {
-						// Check if timeout has exceeded, else stop timer
-						if (!gameTimer.getTimeExceeded()) {
-							choice = this.players[this.current].makeMove(board);
-							isValidMove = checkLegalMove(choice);
+				// Step 4: Loop until a valid move has been made
+				while(!isValidMove) {
+					// Check if timeout has exceeded, else stop timer
+					if (!gameTimer.getTimeExceeded()) {
+						sendCurrentTurn();
+						choice = this.players[this.current].makeMove(board);
+						isValidMove = checkLegalMove(choice);
+						if(isValidMove) {
+							setLastMove(board.getRow(choice), board.getCol(choice));
+							sendMoveProtocol();
 						} else {
-//							System.out.println("Kom ik uberhaupt hier?");
-							players[(current + 1)%2].sentMessage(CHAT + DELIMITER + "\nYour opponent took to long, you have won the game. Going back to the lobby!");
-							players[(current + 1)%2].sentMessage(GAMEOVER + DELIMITER + VICTORY);
-							players[current].sentMessage(CHAT + DELIMITER + "\nGoing back to the lobby \n");
-							players[current].sentMessage(GAMEOVER + DELIMITER + DEFEAT);
-//							System.out.println("Kom ik bij de time Exceeded?");
-							players[current].sentMessage(TIMEOUTEXCEEDED);
-							players[(current + 1) % 2].sentMessage(TIMEOUTEXCEEDED);
-
-							// If true, the game is quit
-							this.prematurelyQuit = true;
-							gameTimer.setStopTimer();
-							break gameloop;
+							sendInvalidMove();
 						}
+						
+					} else {
+						sendMessageTimeOut();
+						// If true, the game is quit
+						this.prematurelyQuit = true;
+						gameTimer.setStopTimer();
+						break gameloop;
 					}
+				}
 
-
+				// A move in time stops the timer 
 				gameTimer.setStopTimer();
 
 
-				// Step 3: Keep track of two passes in a row
+				// Step 5: Keep track of two passes in a row
+				//TODO: PASSING SHOULD BE BLACK->WHITE (thus WHITE->BLACK->WHITE allowed)
 				if (previousTurnPassed && choice == -1) {
 					// QUIT GAME
 					String quitMessage = CHAT + DELIMITER + "\n\nTwo passes in a row, game is quit!\n\n";
@@ -234,22 +239,38 @@ public class Game extends Observable implements Constants4 {
 			}
 		// End of gameloop:
 
-		// Print the final result, who has won!
+		// Final step: Print the final result, who has won!
 		if (!prematurelyQuit) {
 			this.printResult();
-		} else {
-//			System.out.println("Kom ik bij de prematurelyQuit," + current);
-			//			players[(current + 1)%2].sentMessage(CHAT + DELIMITER + "\nYour opponent took to long, you have won the game. Going back to the lobby!");
-			//			players[(current + 1)%2].sentMessage(GAMEOVER + DELIMITER + VICTORY);
-			//			players[current].sentMessage(CHAT + DELIMITER + "\nGoing back to the lobby \n");
-			//			players[current].sentMessage(GAMEOVER + DELIMITER + DEFEAT);
-		}
+		} 
 
 		closeGame();
 	}
 
+	private void sendInvalidMove() {
+		sendMessageToBoth(FAILURE + DELIMITER + INVALIDMOVE);
+		setChanged();
+		notifyObservers(FAILURE + DELIMITER + INVALIDMOVE);
+	}
+
+	protected void sendCurrentTurn() {
+		players[current].sentMessage(CHAT + DELIMITER + "Your turn\n");
+		players[(current + 1) % 2].sentMessage(CHAT + DELIMITER + "Wait until opponent made his choice.\n");
+		setChanged();
+		notifyObservers("TURNSWITCH");
+	}
+
+	protected void sendMessageTimeOut() {
+		players[(current + 1)%2].sentMessage(CHAT + DELIMITER + "\nYour opponent took to long, you have won the game. Going back to the lobby!");
+		players[(current + 1)%2].sentMessage(GAMEOVER + DELIMITER + VICTORY);
+		players[current].sentMessage(CHAT + DELIMITER + "\nGoing back to the lobby \n");
+		players[current].sentMessage(GAMEOVER + DELIMITER + DEFEAT);
+		players[current].sentMessage(TIMEOUTEXCEEDED);
+		players[(current + 1) % 2].sentMessage(TIMEOUTEXCEEDED);
+	}
+
 	private void closeGame() {
-//		System.out.println("Kom ik bij de close game?");
+		//		System.out.println("Kom ik bij de close game?");
 		this.doorgaan = false;
 		setChanged();
 		//		CANCEL and STOPGAME are added to leave a game state or state of waiting for an opponent. QUIT is now exclusively reserved for disconnecting gracefully.
@@ -258,27 +279,43 @@ public class Game extends Observable implements Constants4 {
 	}
 
 	/**
-	 * Prints the game situation.
+	 * Prints the game situation and sends the neccessary commands.
 	 */
 	private void gameUpdate() {
+//		sendBoardString();
+//		sendBoardProtocol();
+//		sendMoveProtocol();
+
+	}
+
+	protected void sendBoardString() {
 		String strBoardMessage = CHAT + DELIMITER + "\n Current game situation: \n\n" + board.toStringOnCommandLine()
 		+ "\n";
-		
-		//		System.out.println(strBoardMessage);
 		sendMessageToBoth(strBoardMessage);
-		notifyObservers(strBoardMessage);
-		
 		setChanged();
-		String strRepresentationBoard = BOARD + DELIMITER + board.createStringRepresentationBoard(board);
+		notifyObservers(strBoardMessage);
+	}
+
+	protected void sendMoveProtocol() {
+		String strLastMoveMade = "";
+		if (choice == -1) {
+			strLastMoveMade = MOVE + DELIMITER + players[current].getMark().toStringForProtocolFull() + DELIMITER + PASS;
+		} else {
+			strLastMoveMade = MOVE + DELIMITER + players[current].getMark().toStringForProtocolFull() + DELIMITER + (getLastMove()[0] + 1) + DELIMITER + (getLastMove()[1] + 1);
+		}
+		sendMessageToBoth(strLastMoveMade);
+		setChanged();
+		notifyObservers(strLastMoveMade);
+	}
+
+	protected void sendBoardProtocol() {
+		int blackCaptives = players[0].getPrisonersTaken();
+		int whiteCaptives = players[1].getPrisonersTaken();
+		String strRepresentationBoard = BOARD + DELIMITER + board.createStringRepresentationBoard(board) + DELIMITER + blackCaptives + DELIMITER + whiteCaptives;
 		sendMessageToBoth(strRepresentationBoard);
-		
-		// Sent to possible observers
-		
-		// TODO: GET THE NOTIFY OBSERVERS RIGHT
-		
+		setChanged();
 		notifyObservers(strRepresentationBoard);
-		//	    System.out.println("Kom ik hier?");
-		//		sendMessageToObservers(strBoardMessage);
+		//		return strRepresentationBoard;
 	}
 
 	/*@
@@ -295,14 +332,14 @@ public class Game extends Observable implements Constants4 {
 		Integer scoreWhite = scores.get("WHITE");
 
 		// Add the prisoners
-		for (int i = 0; i < NUMBER_PLAYERS; i++) {
-			if(players[i].getMark().equals(Mark.BB)) {
-				// Black
-				scoreBlack = scoreBlack + players[i].getPrisonersTaken();
-			} else if (players[i].getMark().equals(Mark.WW)) {
-				scoreWhite = scoreWhite + players[i].getPrisonersTaken();
-			}
-		}
+		//		for (int i = 0; i < NUMBER_PLAYERS; i++) {
+		//			if(players[i].getMark().equals(Mark.BB)) {
+		// Black
+		scoreBlack = scoreBlack + players[0].getPrisonersTaken();
+		//			} else if (players[i].getMark().equals(Mark.WW)) {
+		scoreWhite = scoreWhite + players[1].getPrisonersTaken();
+		//			}
+		//		}
 
 		String scoreString = CHAT + DELIMITER + "\nThe final score is: Black " + scoreBlack + " vs. White " + scoreWhite + "\n"; 
 		System.out.println(scoreString);
@@ -312,13 +349,13 @@ public class Game extends Observable implements Constants4 {
 		//TODO: ENDING THE GAME
 		if(scoreBlack < scoreWhite) {
 			players[0].sentMessage(VICTORY);
-			players[0].sentMessage(DEFEAT);
+			players[1].sentMessage(DEFEAT);
 		} else if (scoreBlack > scoreWhite) {
-			players[0].sentMessage(DEFEAT);
+			players[1].sentMessage(DEFEAT);
 			players[0].sentMessage(VICTORY);
 		} else if (scoreBlack == scoreWhite) {
 			players[0].sentMessage(DRAW);
-			players[0].sentMessage(DRAW);
+			players[1].sentMessage(DRAW);
 		}
 	}
 
@@ -406,5 +443,9 @@ public class Game extends Observable implements Constants4 {
 
 	public boolean getGameHasEnded() {
 		return this.doorgaan;
+	}
+	
+	public Player[] getPlayers() {
+		return players;
 	}
 }

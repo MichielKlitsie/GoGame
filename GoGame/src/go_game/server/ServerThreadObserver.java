@@ -14,7 +14,7 @@ public class ServerThreadObserver extends Thread implements Constants4 {
 	// <---- HIER GEBLEVEN ------------------------------------------------------------
 	// <-------------------------------------------------------------------------------
 	private Server server;
-	private Set<Thread> gameThreadSet = new HashSet<Thread>();
+	private Set<GoGameServer> gameThreadSet = new HashSet<GoGameServer>();
 	private Set<ClientHandler> clientHandlerThreadSet = new HashSet<ClientHandler>();
 	private Set<Thread> otherThreadSet = new HashSet<Thread>();;
 	private int cleanupTime = 10;
@@ -35,7 +35,7 @@ public class ServerThreadObserver extends Thread implements Constants4 {
 		while(server.isAlive()) {
 			// Look at game threads
 			if (gameThreadSet.size() != 0) {
-				for (Thread currentThread : gameThreadSet) {
+				for (GoGameServer currentThread : gameThreadSet) {
 					// cleanup and stop execution
 					if(currentThread.isInterrupted() || !currentThread.isAlive()){
 						// TODO CLEAN UP GAME THREAD
@@ -46,15 +46,15 @@ public class ServerThreadObserver extends Thread implements Constants4 {
 			}
 
 			// Look at clientHandler threads
-			if (clientHandlerThreadSet.size() != 0) {
-				for (ClientHandler currentClientHandler : clientHandlerThreadSet) {
-					if(currentClientHandler.isInterrupted() || currentClientHandler.isAlive()){
-						// TODO CLEAN UP clientHandler THREAD
-						clientHandlerThreadSet.remove(currentClientHandler);
-						logger.log(Level.INFO, currentClientHandler.getName() + " was cleaned up, state was " + currentClientHandler.getState() + ". " + clientHandlerThreadSet.size() + " living CH-threads left");
-					}
-				}
-			}
+//			if (clientHandlerThreadSet.size() != 0) {
+//				for (ClientHandler currentClientHandler : clientHandlerThreadSet) {
+//					if(currentClientHandler.isInterrupted() || currentClientHandler.isAlive()){
+//						// TODO CLEAN UP clientHandler THREAD
+//						clientHandlerThreadSet.remove(currentClientHandler);
+//						logger.log(Level.INFO, currentClientHandler.getName() + " was cleaned up, state was " + currentClientHandler.getState() + ". " + clientHandlerThreadSet.size() + " living CH-threads left");
+//					}
+//				}
+//			}
 
 			// Sleep for a while
 			try {
@@ -81,11 +81,11 @@ public class ServerThreadObserver extends Thread implements Constants4 {
 	}
 
 	// Game threads
-	public Set<Thread> getGameThreads(){
+	public Set<GoGameServer> getGameThreads(){
 		return gameThreadSet;
 	}
 
-	public void addGameThread(Thread gameThread) {
+	public void addGameThread(GoGameServer gameThread) {
 		System.out.println("Game thread is added");
 		gameThreadSet.add(gameThread);
 	}

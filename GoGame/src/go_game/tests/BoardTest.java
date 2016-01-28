@@ -441,6 +441,27 @@ public class BoardTest {
 		assertEquals("Check last move", 9+2, boardSmall.getIndexLastMove());
 	}
 	
+	@Test
+	public void testGetRow() {
+		int dim = boardSmall.DIM;
+		assertEquals(0, boardSmall.getRow(boardSmall.index(0, 0)));
+		assertEquals(1, boardSmall.getRow(boardSmall.index(1, 0)));
+		assertEquals(0, boardSmall.getRow(boardSmall.index(0, 1)));
+		assertEquals(dim-1, boardSmall.getRow(boardSmall.index(dim-1, dim-1)));
+		assertEquals(3, boardSmall.getRow(boardSmall.index(3, dim - 1)));
+		assertEquals(dim-1, boardSmall.getRow(boardSmall.index(dim-1, 3)));
+	}
+	
+	@Test
+	public void testGetCol() {
+		int dim = boardSmall.DIM;
+		assertEquals(0, boardSmall.getCol(boardSmall.index(0, 0)));
+		assertEquals(0, boardSmall.getCol(boardSmall.index(1, 0)));
+		assertEquals(1, boardSmall.getCol(boardSmall.index(0, 1)));
+		assertEquals(dim-1, boardSmall.getCol(boardSmall.index(dim-1, dim-1)));
+		assertEquals(dim-1, boardSmall.getCol(boardSmall.index(3, dim - 1)));
+		assertEquals(3, boardSmall.getCol(boardSmall.index(dim-1, 3)));
+	}
 	// TODO: DeadStones
 }
 

@@ -190,7 +190,7 @@ public class Server extends Thread implements Constants4 {
 			newName = newName + i;
 			i++;
 		}
-		
+
 		return newName;
 	}
 
@@ -216,6 +216,18 @@ public class Server extends Thread implements Constants4 {
 			}
 		}
 	}
+
+	public void broadcastInLobby(String msg) {
+
+		LOGGER.log(Level.INFO,"Broadcasted to all clients in the lobby: " + msg);
+		// Loop through threads-list and send the message
+		List<ClientHandler> playerInLobby = getPlayersInLobby();
+		for (ClientHandler currentClientHandler : playerInLobby) {
+			currentClientHandler.sendMessageToClient(msg);
+		}
+
+	}
+
 
 	/**
 	 * Add a ClientHandler to the collection of ClientHandlers.
@@ -266,7 +278,7 @@ public class Server extends Thread implements Constants4 {
 	}
 
 	public HashMap<String, String> getChallengePartners() {
-		return challengePartners;
+		return this.challengePartners;
 	}
 
 	public void addChallengePartners(String nameChallenger, String nameToBeChallenged) {

@@ -131,6 +131,13 @@ public class Board {
 		return index;
 	}
 
+	public int getRow(int index) {
+		return (index - getCol(index)) / DIM;
+	}
+	
+	public int getCol(int index) {
+		return index % DIM;
+	}
 	//	/**
 	//	 * Calculates the index in the linear array of fields from a (String row, int col)
 	//	 * pair. The row is indicated with a letter and the column with a number.

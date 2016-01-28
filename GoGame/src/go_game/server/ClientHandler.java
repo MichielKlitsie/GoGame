@@ -58,7 +58,7 @@ public class ClientHandler extends Thread implements Constants4 {
 	private Logger logger;
 	private ClientHandler clientHandlerOpponent;
 	private ServerTimer serverTimer;
-	private int timeOutServer = 300;
+	private int timeOutServer = 3000;
 
 	// OPTIONS MENUs corresponding to different states
 	// TODO: FINALIZE THE OPTION MENUS
@@ -303,14 +303,18 @@ public class ClientHandler extends Thread implements Constants4 {
 	public void sendGameStartToServer(String nameChallenger, String nameChallenged, int boardDim, String strMarkChallenger, ClientHandler clientHandlerChallenger) {
 
 		// Set the opponent
-		setClientHandlerOpponent(clientHandlerChallenger);
+//		setClientHandlerOpponent(clientHandlerChallenger);
 
 		// Change state of clientHandler of the challenged and the challenger
 		setIsPlaying(true);
 		setIsInLobby(false);
-		clientHandlerChallenger.setIsPlaying(true);
+		setWaitingForRandomPlay(false);
+		setPendingChallengeStatus(false);
+		clientHandlerChallenger.setIsPlaying(true); 
 		clientHandlerChallenger.setIsInLobby(false);
-
+		clientHandlerChallenger.setWaitingForRandomPlay(false);
+		clientHandlerChallenger.setPendingChallengeStatus(false);
+		
 		// And let the server create a new thread which executes the game with the corresponding sockets used for communication
 		this.goGameServer = server.startGameThread(nameChallenger, nameChallenged, boardDim, strMarkChallenger, 
 				//inChallenged,  outChallenged,  inChallenger, outChallenger);
@@ -378,12 +382,19 @@ public class ClientHandler extends Thread implements Constants4 {
 		this.observeGoGameServer = clientHandlerToObserve.getCurrentGameServer();
 		Game observeGame = observeGoGameServer.getCurrentGame();
 		observeGoGameServer.addObserver(this);
-		sendMessageToClient(observeGame.getCurrentBoard().toString());
+		int blackCaptives = observeGame.getPlayers()[0].getPrisonersTaken();
+		int whiteCaptives = observeGame.getPlayers()[1].getPrisonersTaken();
+		sendMessageToClient(BOARD + DELIMITER + observeGame.getCurrentBoard().createStringRepresentationBoard(observeGame.getCurrentBoard()) + DELIMITER + blackCaptives + DELIMITER + whiteCaptives);
+//		sendMessageToClient(CHAT + DELIMITER + observeGame.getCurrentBoard().toStringOnCommandLine());
+		this.observeGoGameServer.sendMessageBoth(CHAT + DELIMITER + this.getClientName() + " is now observing your game.");
 	}
 
 	public void setObserverModeOff() {
 		this.observeGoGameServer.removeObserver(this);
-
+	}
+	
+	public GoGameServer getObservedGameServer() {
+		return this.observeGoGameServer;
 	}
 
 	public GoGameServer getCurrentGameServer() {
