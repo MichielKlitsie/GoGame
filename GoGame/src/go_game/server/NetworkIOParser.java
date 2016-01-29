@@ -19,28 +19,63 @@ import go_game.protocol.Constants2;
 import go_game.protocol.Constants3;
 import go_game.protocol.Constants4;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class NetworkIOParser.
+ */
 public class NetworkIOParser implements Constants4, AdditionalConstants {
 
+	/** The input string. */
 	// Instance variables ----------------------------
 	private String inputString;
+	
+	/** The output string. */
 	private String outputString;
+	
+	/** The name challenger. */
 	private String nameChallenger; 
+	
+	/** The name challenged. */
 	private String nameChallenged; 
+	
+	/** The client handler. */
 	private ClientHandler clientHandler;
+	
+	/** The server. */
 	private Server server;
+	
+	/** The Constant BOARDSIZE. */
 	private static final String BOARDSIZE = "9";
+	
+	/** The logger. */
 	private Logger logger;
 
+	/** The is playing. */
 	// STATES OF THE CORRESPONDING CLIENTHANDLER
 	private boolean isPlaying;
+	
+	/** The is in lobby. */
 	private boolean isInLobby;
+	
+	/** The is pending challenge. */
 	private boolean isPendingChallenge;
+	
+	/** The is waiting on turn. */
 	private boolean isWaitingOnTurn;
+	
+	/** The is already challenged. */
 	private boolean isAlreadyChallenged;
+	
+	/** The is observing. */
 	private boolean isObserving;
+	
+	/** The is waiting on random play. */
 	private boolean isWaitingOnRandomPlay;
+	
+	/** The is in waiting room. */
 	private boolean isInWaitingRoom;
 
+	/** The pending challenge message. */
 	// PREMADE STRINGS
 	private String pendingChallengeMessage = "You are waiting on a challenge response, do not try to do anything crazy.\n";
 
@@ -51,6 +86,9 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 	// Constructor ----------------------------
 	/**
 	 * Constructor.
+	 *
+	 * @param clientHandler the client handler
+	 * @param server the server
 	 */
 	public NetworkIOParser(ClientHandler clientHandler, Server server) {
 		this.inputString = "";
@@ -64,7 +102,8 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 	/**
 	 * Parse the incoming input of the client handler and call the corresponding functionality on the server side.
 	 * For all commands, see the interface Constant3.java
-	 * @param inputString
+	 *
+	 * @param inputString the input string
 	 * @return outputString (optional)
 	 */
 	public String parseInput(String inputString) {
@@ -879,6 +918,12 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 
 	}
 
+	/**
+	 * Search client handler by name.
+	 *
+	 * @param namePlayer the name player
+	 * @return the client handler
+	 */
 	// Search for clientHandler by name
 	private ClientHandler searchClientHandlerByName(String namePlayer) {
 		List<ClientHandler> availablePlayers = this.server.getAllPlayers();
@@ -894,6 +939,12 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 		return playerTemp;
 	}
 
+	/**
+	 * Search client handler by name exists.
+	 *
+	 * @param namePlayer the name player
+	 * @return true, if successful
+	 */
 	private boolean searchClientHandlerByNameExists(String namePlayer) {
 		boolean playerExists = false;
 		List<ClientHandler> availablePlayers = this.server.getAllPlayers();
@@ -910,22 +961,43 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 
 	// ---------------------------------------------------------------
 	// GETTERS AND SETTERS
+	/**
+	 * Gets the list of players in lobby.
+	 *
+	 * @return the list of players in lobby
+	 */
 	// ---------------------------------------------------------------
 	private List<ClientHandler> getListOfPlayersInLobby() {
 		List<ClientHandler> availablePlayers = this.server.getPlayersInLobby();
 		return availablePlayers;
 	}
 
+	/**
+	 * Gets the list of players playing.
+	 *
+	 * @return the list of players playing
+	 */
 	private List<ClientHandler> getListOfPlayersPlaying() {
 		List<ClientHandler> playingPlayers = this.server.getPlayersPlaying();
 		return playingPlayers;
 	}
 
+	/**
+	 * Gets the list of players waiting for random play.
+	 *
+	 * @return the list of players waiting for random play
+	 */
 	private List<ClientHandler> getListOfPlayersWaitingForRandomPlay() {
 		List<ClientHandler> availablePlayers = this.server.getPlayersWaitingForRandomPlay();
 		return availablePlayers;
 	}
 
+	/**
+	 * Creates the string of list players.
+	 *
+	 * @param listClientHandlerPlayers the list client handler players
+	 * @return the string
+	 */
 	// String creation of a list of the clientHandlers of the players
 	private String createStringOfListPlayers(List<ClientHandler> listClientHandlerPlayers) {
 		String s = "";
@@ -940,6 +1012,12 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 		return s;
 	}
 
+	/**
+	 * Creates the simple string of list players.
+	 *
+	 * @param listClientHandlerPlayers the list client handler players
+	 * @return the string
+	 */
 	private String createSimpleStringOfListPlayers(List<ClientHandler> listClientHandlerPlayers) {
 		String s = "";
 		for (int i = 0; i < listClientHandlerPlayers.size(); i++) {

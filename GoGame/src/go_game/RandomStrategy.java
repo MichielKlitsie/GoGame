@@ -4,22 +4,36 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class RandomStrategy.
+ */
 public class RandomStrategy implements Strategy {
 
+	/** The name strategy. */
 	private String nameStrategy;
+	
+	/** The next move. */
 	private int nextMove;
+	
 	/**
-	 * 
+	 * Instantiates a new random strategy.
 	 */
 	public RandomStrategy() {
 		nameStrategy = "CompletelyRandom";
 	}
 
+	/* (non-Javadoc)
+	 * @see go_game.Strategy#getName()
+	 */
 	@Override
 	public String getName() {
 		return this.nameStrategy;
 	}
 
+	/* (non-Javadoc)
+	 * @see go_game.Strategy#determineMove(go_game.Board, go_game.Mark)
+	 */
 	@Override
 	public int determineMove(Board b, Mark m) {
 		// Random as in... do choose from the empty fields
@@ -33,6 +47,12 @@ public class RandomStrategy implements Strategy {
 		return nextMove;
 	}
 	
+	/**
+	 * Gets the empty fields.
+	 *
+	 * @param b the b
+	 * @return the empty fields
+	 */
 	// Get the empty field on the board
 		public List<Integer> getEmptyFields(Board b) {
 			List<Integer> allFieldIndexes = IntStream.range(0, (b.DIM * b.DIM)).boxed().collect(Collectors.toList());

@@ -1,5 +1,9 @@
+/*
+ * 
+ */
 package go_game.protocol;
 
+// TODO: Auto-generated Javadoc
 /**
  * Go! Protocol
  *
@@ -38,9 +42,15 @@ package go_game.protocol;
  */
 
 public interface Constants4 {
+    
+    /** The Constant VERSION. */
     // General
     public static final String VERSION = "VERSION 1.0";
+    
+    /** The Constant SERVER_PORT. */
     public static final int SERVER_PORT = 1929;
+    
+    /** The Constant TIMEOUTSECONDS. */
     public static final int TIMEOUTSECONDS = 60;
 
     // Delimiters
@@ -48,9 +58,8 @@ public interface Constants4 {
      * Delimiter between command and arguments.
      */
     public static final String DELIMITER = " ";
-    /**
-     * Delimiter for 'subarguments', necessary for the Observer protocol
-     */
+    
+    /** Delimiter for 'subarguments', necessary for the Observer protocol. */
     public static final String SUB_DELIMITER = ";";
 
     // Basic game
@@ -86,16 +95,38 @@ public interface Constants4 {
      * row. Each white, black and empty intersection is represented by a designated constant.
      */
     public static final String NEWPLAYER  = "NEWPLAYER";
+    
+    /** The Constant NEWPLAYERACCEPTED. */
     public static final String NEWPLAYERACCEPTED = "NEWPLAYERACCEPTED";
+    
+    /** The Constant GETOPTIONS. */
     public static final String GETOPTIONS = "GETOPTIONS";
+    
+    /** The Constant OPTIONS. */
     public static final String OPTIONS = "OPTIONS";
+    
+    /** The Constant GETEXTENSIONS. */
     public static final String GETEXTENSIONS = "GETEXTENSIONS";
+    
+    /** The Constant EXTENSIONS. */
     public static final String EXTENSIONS = "EXTENSIONS";
+    
+    /** The Constant PLAY. */
     public static final String PLAY = "PLAY";
+    
+    /** The Constant WAITFOROPPONENT. */
     public static final String WAITFOROPPONENT = "WAITFOROPPONENT";
+    
+    /** The Constant GAMESTART. */
     public static final String GAMESTART = "GAMESTART";
+    
+    /** The Constant MOVE. */
     public static final String MOVE = "MOVE";
+    
+    /** The Constant PASS. */
     public static final String PASS = "PASS";
+    
+    /** The Constant GETBOARD. */
     public static final String GETBOARD = "GETBOARD";
     /**
      * BOARD EEEEEEBEEWWEE... 3 16     (board repr., black captives , white captives)
@@ -103,6 +134,8 @@ public interface Constants4 {
      * The white captives are the white stones captured by black.
      */
     public static final String BOARD = "BOARD";
+    
+    /** The Constant GAMEOVER. */
     public static final String GAMEOVER = "GAMEOVER";
     /**
      * Client -> Server QUIT: Close socket, game, everything.
@@ -115,14 +148,20 @@ public interface Constants4 {
      *      in this actions, receive CANCELLED from the Server;
      */
     public static final String QUIT = "QUIT";
+    
+    /** The Constant CANCEL. */
     public static final String CANCEL = "CANCEL";
+    
+    /** The Constant STOPGAME. */
     public static final String STOPGAME = "STOPGAME";
+    
+    /** The Constant CANCELLED. */
     public static final String CANCELLED = "CANCELLED";
 
-    /**
-     * Strings used to denote color
-     */
+    /** Strings used to denote color. */
     public static final String WHITE = "WHITE";
+    
+    /** The Constant BLACK. */
     public static final String BLACK = "BLACK";
 
     /**
@@ -131,14 +170,22 @@ public interface Constants4 {
      * DEFEAT or DRAW.
      */
     public static final String VICTORY = "VICTORY";
+    
+    /** The Constant DEFEAT. */
     public static final String DEFEAT = "DEFEAT";
+    
+    /** The Constant DRAW. */
     public static final String DRAW = "DRAW";
 
     /**
      * Representation of the intersections when sending board.
      */
     public static final String W = "W";
+    
+    /** The Constant B. */
     public static final String B = "B";
+    
+    /** The Constant E. */
     public static final String E = "E";
 
     /**
@@ -151,8 +198,14 @@ public interface Constants4 {
      * If you are an observer, you cannot chat.
      */
     public static final String CHAT = "CHAT";
+    
+    /** The Constant CHALLENGE. */
     public static final String CHALLENGE = "CHALLENGE";
+    
+    /** The Constant OBSERVER. */
     public static final String OBSERVER = "OBSERVER";
+    
+    /** The Constant COMPUTERPLAYER. */
     public static final String COMPUTERPLAYER = "COMPUTERPLAYER";
 
     /**
@@ -178,15 +231,30 @@ public interface Constants4 {
      * A client can only be challenged by 1 client simultaneously.
      */
     public static final String AVAILABLEPLAYERS = "AVAILABLEPLAYERS";
+    
+    /** The Constant YOUVECHALLENGED. */
     public static final String YOUVECHALLENGED = "YOUVECHALLENGED";
+    
+    /** The Constant YOURECHALLENGED. */
     public static final String YOURECHALLENGED = "YOURECHALLENGED";
+    
+    /** The Constant CHALLENGEACCEPTED. */
     public static final String CHALLENGEACCEPTED = "CHALLENGEACCEPTED";
+    
+    /** The Constant CHALLENGEDENIED. */
     public static final String CHALLENGEDENIED = "CHALLENGEDENIED";
 
+    /** The Constant OBSERVE. */
     // OBSERVER
     public static final String OBSERVE = "OBSERVE";
+    
+    /** The Constant NOGAMESPLAYING. */
     public static final String NOGAMESPLAYING = "NOGAMESPLAYING";
+    
+    /** The Constant CURRENTGAMES. */
     public static final String CURRENTGAMES = "CURRENTGAMES";
+    
+    /** The Constant OBSERVEDGAME. */
     public static final String OBSERVEDGAME = "OBSERVEDGAME";
 
     // AI
@@ -197,13 +265,19 @@ public interface Constants4 {
      * The Server sends a GAMESTART COMPUTER <boardsize> <COLOR>
      */
     public static final String PRACTICE = "PRACTICE";
+    
+    /** The Constant AVAILABLESTRATEGIES. */
     public static final String AVAILABLESTRATEGIES = "AVAILABLESTRATEGIES";
+    
+    /** The Constant COMPUTER. */
     public static final String COMPUTER = "COMPUTER";
     /**
      * HINT and GETHINT are optional. A client may send a GETHINT command,
      * the server can respond with HINT 6 0, in the same format as a move.
      */
     public static final String GETHINT = "GETHINT";
+    
+    /** The Constant HINT. */
     public static final String HINT = "HINT";
 
     /**
@@ -244,16 +318,31 @@ public interface Constants4 {
      */
     public static final String TIMEOUTEXCEEDED = "TimeOutExceeded";
 
+    /** The Constant INVALIDNAME. */
     public static final String INVALIDNAME = "InvalidName";
+    
+    /** The Constant NAMETAKEN. */
     public static final String NAMETAKEN = "NameTaken";
+    
+    /** The Constant NAMENOTALLOWED. */
     public static final String NAMENOTALLOWED = "NameNotAllowed";
+    
+    /** The Constant INVALIDMOVE. */
     public static final String INVALIDMOVE = "InvalidMove";
+    
+    /** The Constant NOTYOURTURN. */
     public static final String NOTYOURTURN = "NotYourTurn";
     /**
      * If an argument is not valid for the given situation, the server can send a FAILURE IllegalArgument.
      */
     public static final String ILLEGALARGUMENT = "IllegalArgument";
+    
+    /** The Constant OTHERPLAYERCANNOTCHAT. */
     public static final String OTHERPLAYERCANNOTCHAT = "OtherPlayerCannotChat";
+    
+    /** The Constant PLAYERNOTAVAILABLE. */
     public static final String PLAYERNOTAVAILABLE = "PlayerNotAvailable";
+    
+    /** The Constant GAMENOTPLAYING. */
     public static final String GAMENOTPLAYING = "GameNotPlaying";
 }

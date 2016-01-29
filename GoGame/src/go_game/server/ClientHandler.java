@@ -21,50 +21,102 @@ import go_game.protocol.Constants2;
 import go_game.protocol.Constants3;
 import go_game.protocol.Constants4;
 
+// TODO: Auto-generated Javadoc
 /**
  * ClientHandler.
  * @author  Michiel Klitsie
  * @version $Revision: 1.1 $
  */
 public class ClientHandler extends Thread implements Constants4, AdditionalConstants {
+	
+	/** The server. */
 	// Instance variables -------------------------------------------------------------
 	private Server server;
+	
+	/** The in. */
 	private BufferedReader in;
+	
+	/** The out. */
 	private BufferedWriter out;
+	
+	/** The client name. */
 	private String clientName;
+	
+	/** The m network io parser. */
 	private NetworkIOParser mNetworkIOParser;
+	
+	/** The terminated. */
 	private boolean terminated = false;
 
+	/** The go game server. */
 	// The server thread that plays a game
 	private GoGameServer goGameServer;
 
+	/** The is pending challenge. */
 	// STATES of the Client
 	private boolean isPendingChallenge;
+	
+	/** The move has been made. */
 	private boolean moveHasBeenMade;
+	
+	/** The pass move made. */
 	private boolean passMoveMade;
+	
+	/** The index move made. */
 	private boolean indexMoveMade;
+	
+	/** The is waiting on turn. */
 	private boolean isWaitingOnTurn;
+	
+	/** The is playing. */
 	private boolean isPlaying;
+	
+	/** The in lobby. */
 	private boolean inLobby;
+	
+	/** The is already challenged. */
 	private boolean isAlreadyChallenged;
+	
+	/** The is observing. */
 	private boolean isObserving;
+	
+	/** The is waiting for random play. */
 	private boolean isWaitingForRandomPlay;
+	
+	/** The is in waiting room. */
 	private boolean isInWaitingRoom;
 
+	/** The chosen strategy. */
 	// Chosen strategy
 	private String chosenStrategy;
 
+	/** The last move. */
 	// Keep track of making a move
 	private int[] lastMove = {-999, -999};
+	
+	/** The last index move. */
 	private int lastIndexMove;
+	
+	/** The logger. */
 	private Logger logger;
+	
+	/** The client handler opponent. */
 	private ClientHandler clientHandlerOpponent;
+	
+	/** The server timer. */
 	private ServerTimer serverTimer;
+	
+	/** The time out server. */
 	private int timeOutServer = 3000;
 
+	/** The observe go game server. */
 	// OBSERVER 
 	private GoGameServer observeGoGameServer;
+	
+	/** The sock. */
 	private Socket sock;
+	
+	/** The last mark. */
 	private Mark lastMark;
 
 	// Constructor ----------------------------------------------------------------
@@ -72,6 +124,10 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 	/**
 	 * Constructs a ClientHandler object, who is a server-thread handling the communication
 	 * Initialises both Data streams.
+	 *
+	 * @param serverArg the server arg
+	 * @param sockArg the sock arg
+	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	//@ requires serverArg != null && sockArg != null;
 	public ClientHandler(Server serverArg, Socket sockArg) throws IOException {
@@ -116,11 +172,18 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 	 * is participating in the chat. Not0,
 	 * ice that this method should 
 	 * be called immediately after the ClientHandler has been constructed.
+	 *
+	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	public void announce() throws IOException {
 		server.broadcast(CHAT + DELIMITER + "[" + clientName + " has entered the lobby]");
 	}
 
+	/**
+	 * Deny.
+	 *
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public void deny() throws IOException {
 		//		clientName = in.readLine(); //<---- HIER GEBLEVEN
 		//		server.broadcast("USER_DENIED");
@@ -176,6 +239,9 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 	}
 
 
+	/**
+	 * Waiting room check.
+	 */
 	protected void waitingRoomCheck() {
 		// THE WAITING ROOM: Check the double names, invalid names or not allowed names
 		boolean nameIsTaken = true;
@@ -230,6 +296,8 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 	 * connection to the Client. If the writing of a message fails,
 	 * the method concludes that the socket connection has been lost
 	 * and shutdown() is called.
+	 *
+	 * @param msg the msg
 	 */
 	public void sendMessageToClient(String msg) {
 		try {
@@ -241,6 +309,11 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 		}
 	}
 
+	/**
+	 * Send message to server.
+	 *
+	 * @param msg the msg
+	 */
 	public void sendMessageToServer(String msg) {
 		// Show the command on the server side
 		logger.log(Level.INFO,"Command received: " + msg);
@@ -268,6 +341,15 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 	}
 
 
+	/**
+	 * Send game start to server.
+	 *
+	 * @param nameChallenger the name challenger
+	 * @param nameChallenged the name challenged
+	 * @param boardDim the board dim
+	 * @param strMarkChallenger the str mark challenger
+	 * @param clientHandlerChallenger the client handler challenger
+	 */
 	// MAAK THE MESSAGE TO SERVER TO START THE GAME
 	public void sendGameStartToServer(String nameChallenger, String nameChallenged, int boardDim, String strMarkChallenger, ClientHandler clientHandlerChallenger) {
 
@@ -294,6 +376,9 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 	}
 
 
+	/**
+	 * Wait for input.
+	 */
 	// Wait for input
 	public void waitForInput() {
 		Scanner line = new Scanner(in);
@@ -306,6 +391,13 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 		//return input;
 	}
 
+	/**
+	 * Sent parsed move to go game server.
+	 *
+	 * @param xCo the x co
+	 * @param yCo the y co
+	 * @return true, if successful
+	 */
 	// SENT MOVE COMMANDS
 	public boolean sentParsedMoveToGoGameServer(int xCo, int yCo) {
 		logger.log(Level.INFO,"A (x,y) move has been registered by the client handler");
@@ -320,6 +412,12 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 		return this.moveHasBeenMade;
 	}
 
+	/**
+	 * Sent parsed move to go game server.
+	 *
+	 * @param passMove the pass move
+	 * @return true, if successful
+	 */
 	public boolean sentParsedMoveToGoGameServer(String passMove) {
 		logger.log(Level.INFO,"A passing move has been registered by the client handler");
 		this.sendMessageToClient("\nYour pass move is registered\n");
@@ -331,6 +429,12 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 		return this.moveHasBeenMade;
 	}
 
+	/**
+	 * Sent parsed move to go game server.
+	 *
+	 * @param fieldIndex the field index
+	 * @return true, if successful
+	 */
 	public boolean sentParsedMoveToGoGameServer(int fieldIndex) {
 		logger.log(Level.INFO,"A fieldIndex move has been registered by the client handler");
 		this.sendMessageToClient("\n Your fieldIndex move is registered \n");
@@ -344,6 +448,11 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 		return this.moveHasBeenMade;
 	}
 
+	/**
+	 * Sets the observer mode on.
+	 *
+	 * @param clientHandlerToObserve the new observer mode on
+	 */
 	// OBSERVER MODE ------------------------------------------------------------
 	public void setObserverModeOn(ClientHandler clientHandlerToObserve) {
 		// Get the game of the server
@@ -358,114 +467,229 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 		this.observeGoGameServer.sendMessageBoth(CHAT + DELIMITER + this.getClientName() + " is now observing your game.");
 	}
 
+	/**
+	 * Sets the observer mode off.
+	 */
 	public void setObserverModeOff() {
 		this.observeGoGameServer.removeObserver(this);
 	}
 	
+	/**
+	 * Gets the observed game server.
+	 *
+	 * @return the observed game server
+	 */
 	public GoGameServer getObservedGameServer() {
 		return this.observeGoGameServer;
 	}
 
+	/**
+	 * Gets the current game server.
+	 *
+	 * @return the current game server
+	 */
 	public GoGameServer getCurrentGameServer() {
 		return this.goGameServer;
 	}
 
+	/**
+	 * Sets the current game server.
+	 *
+	 * @param goGameServer the new current game server
+	 */
 	public void setCurrentGameServer(GoGameServer goGameServer) {
 		this.goGameServer = goGameServer;
 	}
 
 
+	/**
+	 * Gets the options lobby.
+	 *
+	 * @return the options lobby
+	 */
 	// GETTERS AND SETTERS ------------------------------------------------
 	public String getOptionsLobby() {
 		return this.OPTIONSMENULOBBY;
 	}
 
+	/**
+	 * Gets the options game.
+	 *
+	 * @return the options game
+	 */
 	public String getOptionsGame() {
 		return this.OPTIONSMENUPLAYING;
 	}
 
+	/**
+	 * Gets the options pending challenge.
+	 *
+	 * @return the options pending challenge
+	 */
 	public String getOptionsPendingChallenge() {
 		return this.OPTIONSMENUPENDINGCHALLENGE;
 	}
 
+	/**
+	 * Gets the options waiting on move.
+	 *
+	 * @return the options waiting on move
+	 */
 	public String getOptionsWaitingOnMove() {
 		return this.OPTIONSMENUWAITINGMOVE;
 	}
 
+	/**
+	 * Gets the options observing.
+	 *
+	 * @return the options observing
+	 */
 	public String getOptionsObserving() {
 		return this.OPTIONSMENUOBSERVING;
 	}
 
+	/**
+	 * Gets the options is in waiting room.
+	 *
+	 * @return the options is in waiting room
+	 */
 	public String getOptionsIsInWaitingRoom() {
 		return this.OPTIONSMENUWAITINGROOM;
 	}
 	
 	/**
-	 * This method will return the client name working on this thread
+	 * This method will return the client name working on this thread.
+	 *
+	 * @return the client name
 	 */
 
 	public String getClientName() {
 		return clientName;
 	}
 
+	/**
+	 * Sets the client name.
+	 *
+	 * @param newName the new client name
+	 */
 	public void setClientName(String newName) {
 		this.clientName = newName;
 	}
 
+	/**
+	 * Gets the pending challenge status.
+	 *
+	 * @return the pending challenge status
+	 */
 	public boolean getPendingChallengeStatus() {
 		return this.isPendingChallenge;
 	}
 
 
+	/**
+	 * Sets the pending challenge status.
+	 *
+	 * @param pendingChallengeStatus the new pending challenge status
+	 */
 	public void setPendingChallengeStatus(boolean pendingChallengeStatus) {
 		this.isPendingChallenge = pendingChallengeStatus;
 	}
 
+	/**
+	 * Sets the index move made.
+	 *
+	 * @param indexMoveMade the new index move made
+	 */
 	public void setIndexMoveMade(boolean indexMoveMade) {
 		this.indexMoveMade = indexMoveMade;	
 	}
 
+	/**
+	 * Gets the index move made.
+	 *
+	 * @return the index move made
+	 */
 	public boolean getIndexMoveMade() {
 		return this.indexMoveMade;
 	}
 
+	/**
+	 * Sets the pass move made.
+	 *
+	 * @param passMoveMade the new pass move made
+	 */
 	public void setPassMoveMade(boolean passMoveMade) {
 		this.passMoveMade = passMoveMade;
 	}
 
+	/**
+	 * Gets the pass move made.
+	 *
+	 * @return the pass move made
+	 */
 	public boolean getPassMoveMade() {
 		return this.passMoveMade;
 	}
 
+	/**
+	 * Gets the last move.
+	 *
+	 * @return the last move
+	 */
 	public int[] getLastMove() {
 		return this.lastMove;
 	}
 
+	/**
+	 * Gets the last index move.
+	 *
+	 * @return the last index move
+	 */
 	public int getLastIndexMove() {
 		return this.lastIndexMove;
 	}
 
+	/**
+	 * Gets the move has been made.
+	 *
+	 * @return the move has been made
+	 */
 	public boolean getMoveHasBeenMade() {
 		return moveHasBeenMade;
 	}
 
+	/**
+	 * Sets the move has been made.
+	 *
+	 * @param moveHasBeenMade the new move has been made
+	 */
 	public void setMoveHasBeenMade(boolean moveHasBeenMade) {
 		this.moveHasBeenMade = moveHasBeenMade;
 	}
 
 
+	/**
+	 * Gets the checks if is waiting for random play.
+	 *
+	 * @return the checks if is waiting for random play
+	 */
 	public boolean getIsWaitingForRandomPlay() {
 		return isWaitingForRandomPlay;
 	}
 
 
+	/**
+	 * Sets the checks if is waiting for random play.
+	 *
+	 * @param isWaitingForRandomPlay the new checks if is waiting for random play
+	 */
 	public void setIsWaitingForRandomPlay(boolean isWaitingForRandomPlay) {
 		this.isWaitingForRandomPlay = isWaitingForRandomPlay;
 	}
 
 	/**
 	 * Make a string representation for the check in the HashMap for the 'SuperKo'.
-	 * @param board
+	 *
 	 * @return String stringBoard
 	 */
 	public String getProtocolStringRepresentationBoard() {
@@ -486,72 +710,152 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 		return stringBoard;
 	}
 
+	/**
+	 * Gets the checks if is waiting on turn.
+	 *
+	 * @return the checks if is waiting on turn
+	 */
 	// TURN
 	public boolean getIsWaitingOnTurn() {
 		return isWaitingOnTurn;
 	}
 
 
+	/**
+	 * Sets the checks if is waiting on turn.
+	 *
+	 * @param isWaitingOnTurn the new checks if is waiting on turn
+	 */
 	public void setIsWaitingOnTurn(boolean isWaitingOnTurn) {
 		this.isWaitingOnTurn = isWaitingOnTurn;
 	}
 
+	/**
+	 * Sets the checks if is already challenged.
+	 *
+	 * @param isAlreadyChallenged the new checks if is already challenged
+	 */
 	public void setIsAlreadyChallenged(boolean isAlreadyChallenged) {
 		this.isAlreadyChallenged = isAlreadyChallenged;
 	}
 
+	/**
+	 * Gets the checks if is already challenged.
+	 *
+	 * @return the checks if is already challenged
+	 */
 	public boolean getIsAlreadyChallenged() {
 		return this.isAlreadyChallenged;
 	}
 
+	/**
+	 * Gets the checks if is playing.
+	 *
+	 * @return the checks if is playing
+	 */
 	public boolean getIsPlaying() {
 		return isPlaying;
 	}
 
 
+	/**
+	 * Sets the checks if is playing.
+	 *
+	 * @param isPlaying the new checks if is playing
+	 */
 	public void setIsPlaying(boolean isPlaying) {
 		this.isPlaying = isPlaying;
 	}
 
 
+	/**
+	 * Gets the checks if is in lobby.
+	 *
+	 * @return the checks if is in lobby
+	 */
 	public boolean getIsInLobby() {
 		return inLobby;
 	}
 
 
+	/**
+	 * Sets the checks if is in lobby.
+	 *
+	 * @param inLobby the new checks if is in lobby
+	 */
 	public void setIsInLobby(boolean inLobby) {
 		this.inLobby = inLobby;
 	}
 
+	/**
+	 * Gets the client handler opponent.
+	 *
+	 * @return the client handler opponent
+	 */
 	public ClientHandler getClientHandlerOpponent() {
 		return this.clientHandlerOpponent;
 	}
 
+	/**
+	 * Sets the client handler opponent.
+	 *
+	 * @param clientHandlerOpponent the new client handler opponent
+	 */
 	public void setClientHandlerOpponent(ClientHandler clientHandlerOpponent) {
 		this.clientHandlerOpponent = clientHandlerOpponent;
 	}
 
+	/**
+	 * Sets the checks if is observing.
+	 *
+	 * @param isObserving the new checks if is observing
+	 */
 	public void setIsObserving(boolean isObserving) {
 		this.isObserving = isObserving;
 	}
 
+	/**
+	 * Gets the checks if is observing.
+	 *
+	 * @return the checks if is observing
+	 */
 	public boolean getIsObserving() {
 		return this.isObserving;
 	}
 
 
+	/**
+	 * Sets the checks if is in waiting room.
+	 *
+	 * @param isInWaitingRoom the new checks if is in waiting room
+	 */
 	public void setIsInWaitingRoom(boolean isInWaitingRoom) {
 		this.isInWaitingRoom = isInWaitingRoom;
 	}
 
+	/**
+	 * Gets the checks if is in waiting room.
+	 *
+	 * @return the checks if is in waiting room
+	 */
 	public boolean getIsInWaitingRoom() {
 		return this.isInWaitingRoom;
 	}
 
+	/**
+	 * Gets the server.
+	 *
+	 * @return the server
+	 */
 	public Server getServer() {
 		return this.server;
 	}
 
+	/**
+	 * Gets the checks if is socket closed.
+	 *
+	 * @return the checks if is socket closed
+	 */
 	public boolean getIsSocketClosed() {
 		//		try {
 		this.terminated = sock.isClosed() || sock.isConnected();
@@ -566,19 +870,39 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 
 	}
 
+	/**
+	 * Gets the chosen strategy.
+	 *
+	 * @return the chosen strategy
+	 */
 	public String getChosenStrategy() {
 		return chosenStrategy;
 	}
 
 
+	/**
+	 * Sets the chosen strategy.
+	 *
+	 * @param chosenStrategy the new chosen strategy
+	 */
 	public void setChosenStrategy(String chosenStrategy) {
 		this.chosenStrategy = chosenStrategy;
 	}
 
+	/**
+	 * Sets the last mark.
+	 *
+	 * @param mark the new last mark
+	 */
 	public void setLastMark(Mark mark) {
 		this.lastMark = mark;
 	}
 	
+	/**
+	 * Gets the last mark.
+	 *
+	 * @return the last mark
+	 */
 	public Mark getLastMark() {
 		return this.lastMark;
 	}

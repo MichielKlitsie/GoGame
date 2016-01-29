@@ -5,6 +5,7 @@ import java.util.Scanner;
 import go_game.protocol.Constants4;
 import go_game.server.ClientHandler;
 
+// TODO: Auto-generated Javadoc
 /**
  * Class for maintaining a human player in the Go game.
  * 
@@ -17,6 +18,7 @@ public class HumanPlayer extends Player implements Constants4 {
 
 	// -- Constructors -----------------------------------------------
 
+	/** The client handler. */
 	/*@
        requires name != null;
        requires mark == Mark.XX || mark == Mark.OO;
@@ -29,7 +31,10 @@ public class HumanPlayer extends Player implements Constants4 {
 
 	/**
 	 * Creates a new human player object.
-	 * 
+	 *
+	 * @param name the name
+	 * @param mark the mark
+	 * @param clientHandler the client handler
 	 */
 	public HumanPlayer(String name, Mark mark, ClientHandler clientHandler) {
 		super(name, mark);
@@ -140,6 +145,9 @@ public class HumanPlayer extends Player implements Constants4 {
 	}
 
 
+	/* (non-Javadoc)
+	 * @see go_game.Player#sentMessage(java.lang.String)
+	 */
 	public void sentMessage(String msg) {
 		getClientHandler().sendMessageToClient(msg);
 	}
@@ -148,6 +156,11 @@ public class HumanPlayer extends Player implements Constants4 {
 	// GETTERS AND SETTERS
 	// ------------------------------------------
 
+	/**
+	 * Gets the client handler.
+	 *
+	 * @return the client handler
+	 */
 	public ClientHandler getClientHandler() {
 		// Message functionality here
 		return this.clientHandler;

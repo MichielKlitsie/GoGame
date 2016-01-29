@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+// TODO: Auto-generated Javadoc
 /**
  * The board for the Go game. Module Software System final project.
  *
@@ -20,9 +21,11 @@ import java.util.stream.Stream;
  */
 public class Board {
 	// Change number to increase or decrease size of board
+	/** The dim. */
 	//	public static final int DIM = 9;
 	public static int DIM = 9;
 
+	/** The Constant NUMBERING. */
 	/* An empty board
 //	private static final String[] NUMBERING = {
 //			"|———|———|———|———|———|———|———|———| A",
@@ -63,11 +66,18 @@ public class Board {
 			"|———|———|———|———|———|———|———|———| I",
 	"1   2   3   4   5   6   7   8   9   "};
 
+	/** The Constant LINE. */
 	// The 'inbetween line', taken from the second line of the empty board
 	private static final String LINE = NUMBERING[1]; 
+	
+	/** The Constant EMPTYLINEPIECE. */
 	public static final String EMPTYLINEPIECE = "|   ";
+	
+	/** The Constant DELIM. */
 	// The delimiter, empty in this case
 	private static final String DELIM = "";
+	
+	/** The Constant DELIM_BETWEEN. */
 	private static final String DELIM_BETWEEN = "   ";
 
 	/**
@@ -80,14 +90,19 @@ public class Board {
 	private Mark[] fields;
 
 	// Keep track of previous boards for the Ko-Rule
+	/** The previous boards. */
 	//	public List<Board> previousBoards = new ArrayList<Board>();
 	HashSet<String> previousBoards  = new HashSet<String>();
+	
+	/** The index last move. */
 	private int indexLastMove;
 
 
 	// -- Constructors -----------------------------------------------
 	/**
 	 * Creates an empty Go board.
+	 *
+	 * @param dim the dim
 	 */
 	//@ ensures (\forall int i; 0 <= i & i < DIM * DIM; this.getField(i) == Mark.EMPTY);
 	public Board(int dim) {
@@ -101,6 +116,8 @@ public class Board {
 
 	/**
 	 * Creates a deep copy of this field.
+	 *
+	 * @return the board
 	 */
 	/*@ ensures \result != this;
         ensures (\forall int i; 0 <= i & i < DIM * DIM;
@@ -120,6 +137,9 @@ public class Board {
 	/**
 	 * Calculates the index in the linear array of fields from a (int row, int col)
 	 * pair.
+	 *
+	 * @param row the row
+	 * @param col the col
 	 * @return the index belonging to the (row,col)-field
 	 */
 	//@ requires 0 <= row & row < DIM;
@@ -131,10 +151,22 @@ public class Board {
 		return index;
 	}
 
+	/**
+	 * Gets the row.
+	 *
+	 * @param index the index
+	 * @return the row
+	 */
 	public int getRow(int index) {
 		return (index - getCol(index)) / DIM;
 	}
 	
+	/**
+	 * Gets the col.
+	 *
+	 * @param index the index
+	 * @return the col
+	 */
 	public int getCol(int index) {
 		return index % DIM;
 	}
@@ -160,6 +192,8 @@ public class Board {
 	// Check validity of index a field from the board ------------------------------------------
 	/**
 	 * Returns true if index is a valid index of a field on the board.
+	 *
+	 * @param index the index
 	 * @return true if 0 <= index < DIM*DIM
 	 */
 	//@ ensures \result == (0 <= index && index < DIM * DIM);
@@ -175,6 +209,8 @@ public class Board {
 	/**
 	 * Returns true of the (int row, int col) pair refers to a valid field on the student.
 	 *
+	 * @param row the row
+	 * @param col the col
 	 * @return true if 0 <= row < DIM && 0 <= col < DIM
 	 */
 	//@ ensures \result == (0 <= row && row < DIM && 0 <= col && col < DIM);
@@ -298,9 +334,10 @@ public class Board {
 	// GAME RULES ---------------------------------------------------------------------------------------------
 	// GO RULES!!!
 	/**
-	 * Checks whether a made move results in a stone without a liberty
+	 * Checks whether a made move results in a stone without a liberty.
 	 *
-	 * @param index
+	 * @param index the index
+	 * @param mark the mark
 	 * @return true if there is still a liberty left
 	 */
 	public boolean hasLiberty(int index, Mark mark) {
@@ -331,7 +368,7 @@ public class Board {
 	/**
 	 * Obtains a list of the adjecent fields, if they exist.
 	 *
-	 * @param index
+	 * @param index the index
 	 * @return List<Integer> adjecentFields;
 	 */
 	public List<Integer> getAdjecentFields(int index) {
@@ -359,8 +396,9 @@ public class Board {
 
 	/**
 	 * /**
-	 * Check the liberties of every field with the supplied mark
-	 * @param mark
+	 * Check the liberties of every field with the supplied mark.
+	 *
+	 * @param mark the mark
 	 * @return prisoners.size()
 	 */
 	public int checkLiberties(Mark mark) {
@@ -412,7 +450,10 @@ public class Board {
 	//	}
 
 	/**
-	 * 
+	 * Check suicide.
+	 *
+	 * @param mark the mark
+	 * @return true, if successful
 	 */
 	public boolean checkSuicide(Mark mark) {
 		return checkLiberties(mark) < 1;
@@ -421,8 +462,7 @@ public class Board {
 	/**
 	 * Checks the Ko-rule, e.g. if a previous position of stones is repeated 
 	 *
-	 * @param m
-	 *            the mark of interest
+	 * @param board the board
 	 * @return true if there is still a liberty left
 	 */
 	public boolean hasKo(Board board) {
@@ -433,6 +473,11 @@ public class Board {
 
 	// CHECKS FOR WINNER ---------------------------------------------------------------------------------------------
 
+	/**
+	 * Calculate score.
+	 *
+	 * @return the map
+	 */
 	public Map<String, Integer> calculateScore() {
 		// Afhankelijk van type scoring, maar volgens regels is territory scoring 
 
@@ -490,6 +535,12 @@ public class Board {
 	}
 
 
+	/**
+	 * Calculate areas.
+	 *
+	 * @param mark the mark
+	 * @return the list
+	 */
 	public List<List<Integer>> calculateAreas(Mark mark) {
 		// Calculate chains
 		List<List<Integer>> chains = calculateChainsByStreams(mark);
@@ -511,6 +562,12 @@ public class Board {
 		return areas;
 	}
 
+	/**
+	 * Calculate chains by streams.
+	 *
+	 * @param mark the mark
+	 * @return the list
+	 */
 	public List<List<Integer>> calculateChainsByStreams(Mark mark) {
 		// Create a list from 1 to DIM * DIM
 		List<Integer> allFieldIndexes = IntStream.range(0, DIM * DIM).boxed().collect(Collectors.toList());
@@ -529,6 +586,14 @@ public class Board {
 		return chains;
 	}
 
+	/**
+	 * Recursive chain maker.
+	 *
+	 * @param previousChain the previous chain
+	 * @param previousIndex the previous index
+	 * @param mark the mark
+	 * @return the list
+	 */
 	public List<Integer> recursiveChainMaker(List<Integer> previousChain, int previousIndex, Mark mark) {
 		// Add to the List
 		if (!previousChain.contains(previousIndex)) {
@@ -545,6 +610,13 @@ public class Board {
 		return previousChain;
 	}
 	
+	/**
+	 * Gets the same mark adjecent fields.
+	 *
+	 * @param fieldIndex the field index
+	 * @param mark the mark
+	 * @return the same mark adjecent fields
+	 */
 	public List<Integer> getSameMarkAdjecentFields(int fieldIndex, Mark mark) {
 		List<Integer> adjecentFields  = getAdjecentFields(fieldIndex);
 		List<Integer> sameMarkAdjecentFields = adjecentFields.stream()
@@ -554,6 +626,9 @@ public class Board {
 	}
 
 	
+	/**
+	 * Removes the dead stones.
+	 */
 	public void removeDeadStones() {
 		// At the end of the game, the stones that are still on the board, but unable to avoid capture become prisoners
 	}
@@ -616,7 +691,8 @@ public class Board {
 
 	/**
 	 * Make a string representation for the check in the HashMap for the 'SuperKo'.
-	 * @param board
+	 *
+	 * @param board the board
 	 * @return String stringBoard
 	 */
 	public String createStringRepresentationBoard(Board board) {
@@ -681,6 +757,11 @@ public class Board {
 		indexLastMove = index(row, col);
 	}
 
+	/**
+	 * Adds the previous board.
+	 *
+	 * @param board the board
+	 */
 	public void addPreviousBoard(Board board) {
 		// Make a string representatie
 		String stringBoard = createStringRepresentationBoard(board);
@@ -688,10 +769,20 @@ public class Board {
 		previousBoards.add(stringBoard);
 	}
 
+	/**
+	 * Gets the index last move.
+	 *
+	 * @return the index last move
+	 */
 	public int getIndexLastMove() {
 		return this.indexLastMove;
 	}
 
+	/**
+	 * Gets the dimensions.
+	 *
+	 * @return the dimensions
+	 */
 	public int getDimensions() {
 		return DIM;
 	}

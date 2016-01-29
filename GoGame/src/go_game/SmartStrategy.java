@@ -12,45 +12,85 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+// TODO: Auto-generated Javadoc
 /**
- * @author michiel.klitsie
+ * The Class SmartStrategy.
  *
+ * @author michiel.klitsie
  */
 public class SmartStrategy implements Strategy {
 
+	/** The winning move. */
 	//TODO: BUILD THE SMART STRATEGY
 	private int winningMove;
+	
+	/** The name strategy. */
 	private String nameStrategy;
+	
+	/** The best move. */
 	private int bestMove;
+	
+	/** The best qual. */
 	private int bestQual;
+	
+	/** The current field. */
 	private int currentField;
 	
 
+	/**
+	 * The Enum QUAL.
+	 */
 	// Rating the quality of the moves
 	public enum QUAL{
+		
+		/** The losing. */
 		LOSING(0),
+		
+		/** The neutral. */
 		NEUTRAL(1),
+		
+		/** The winning. */
 		WINNING(2);
+		
+		/** The value. */
 		private int value;
+		
+		/**
+		 * Instantiates a new qual.
+		 *
+		 * @param newValue the new value
+		 */
 		QUAL(int newValue) {
 			value = newValue;
 		}
+		
+		/**
+		 * Gets the value.
+		 *
+		 * @return the value
+		 */
 		public int getValue() { return value; }
 	}
 
 	/**
-	 * 
+	 * Instantiates a new smart strategy.
 	 */
 	public SmartStrategy() {
 		this.nameStrategy = "Smart strategy";
 		this.winningMove = 0;
 	}
 
+	/* (non-Javadoc)
+	 * @see go_game.Strategy#getName()
+	 */
 	@Override
 	public String getName() {
 		return nameStrategy;
 	}
 
+	/* (non-Javadoc)
+	 * @see go_game.Strategy#determineMove(go_game.Board, go_game.Mark)
+	 */
 	@Override
 	public int determineMove(Board b, Mark m) {
 		// Create a list from 1 to DIM * DIM
@@ -64,6 +104,14 @@ public class SmartStrategy implements Strategy {
 		return 0;
 	}
 
+	/**
+	 * Determine best opening move.
+	 *
+	 * @param b the b
+	 * @param m the m
+	 * @param listEmptyFields the list empty fields
+	 * @return the int
+	 */
 	public int determineBestOpeningMove(Board b, Mark m, List<Integer> listEmptyFields) {
 		// Step 1: Determine if opening moves are still relevant
 		// Step 1a: Opening: FIRST, get one of the corner positions
@@ -76,6 +124,13 @@ public class SmartStrategy implements Strategy {
 
 
 	// Step 2: PLAYS
+	/**
+	 * Determine best playing move.
+	 *
+	 * @param b the b
+	 * @param m the m
+	 * @return the int
+	 */
 	//	Plays are usually on the third or fourth line—the second makes too little territory, while the fifth is too easily undermined by a play on the third. 
 	public int determineBestPlayingMove(Board b, Mark m) {
 		if (bestQual == QUAL.WINNING.getValue()) {
@@ -97,10 +152,23 @@ public class SmartStrategy implements Strategy {
 		return 0;
 	}
 
+	/**
+	 * Check direct win.
+	 *
+	 * @param b the b
+	 * @param m the m
+	 * @return true, if successful
+	 */
 	public boolean checkDirectWin(Board b, Mark m) {
 		return false;
 	}
 
+	/**
+	 * Gets the empty fields.
+	 *
+	 * @param b the b
+	 * @return the empty fields
+	 */
 	// Get the empty field on the board
 	public List<Integer> getEmptyFields(Board b) {
 		List<Integer> allFieldIndexes = IntStream.range(0, (b.DIM * b.DIM)).boxed().collect(Collectors.toList());
@@ -109,6 +177,14 @@ public class SmartStrategy implements Strategy {
 	}
 
 	// Opening tactics
+	/**
+	 * Check open star points.
+	 *
+	 * @param b the b
+	 * @param listEmptyFields the list empty fields
+	 * @param line the line
+	 * @return the list
+	 */
 	// FUSEKI / OPENING MOVES
 	public List<Integer> checkOpenStarPoints(Board b, List<Integer> listEmptyFields, int line) {
 		//4-4 star points in the corners
@@ -124,21 +200,41 @@ public class SmartStrategy implements Strategy {
 		return listOpenStarPoints;
 	}
 
+	/**
+	 * Builds the joseki.
+	 *
+	 * @param b the b
+	 */
 	private void buildJoseki(Board b) {
 		//		After that, standard sequences (Joseki) can be used to develop corner positions, and extensions along the side can be made. 
 	}
 
 	// OFFENCE TACTICS ------------------------------------
+	/**
+	 * Builds the group.
+	 *
+	 * @param b the b
+	 */
 	// Connection & Separation
 	private void buildGroup(Board b) {
 		//		Connecting a group with one eye to another one-eyed group makes them live together. Connecting individual stones into a single group results in an increase of liberties; 
 	}
 
+	/**
+	 * Cut other group.
+	 *
+	 * @param b the b
+	 */
 	private void cutOtherGroup(Board b) {
 		// Prevent other player from building groups
 	}
 
 	// CLASSIFICTION OF GROUPS
+	/**
+	 * Checking eyes.
+	 *
+	 * @param b the b
+	 */
 	// ALIVE or DEAD or UNSETTLED
 	private void checkingEyes(Board b) {
 		// A single empty space inside a group is called an eye

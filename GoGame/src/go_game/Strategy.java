@@ -3,6 +3,7 @@
  */
 package go_game;
 
+// TODO: Auto-generated Javadoc
 /**
  * An interface to determine the next move (strategy) for the tic-tac-toe game.
  * @author michiel.klitsie
@@ -21,6 +22,9 @@ public interface Strategy {
 	
 	/**
 	 * public int determineMove().
+	 *
+	 * @param b the b
+	 * @param m the m
 	 * @return int nextMove;
 	 */
 	/*

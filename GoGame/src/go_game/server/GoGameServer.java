@@ -25,28 +25,60 @@ import go_game.protocol.AdditionalConstants;
 import go_game.protocol.Constants3;
 import go_game.protocol.Constants4;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class GoGameServer.
+ */
 public class GoGameServer extends Thread implements Constants4, Observer, AdditionalConstants {
 
+	/** The p1. */
 	// Instance variables
 	private Player p1;
+	
+	/** The p2. */
 	private Player p2;
+	
+	/** The mark challenger. */
 	private Mark markChallenger;
+	
+	/** The mark challenged. */
 	private Mark markChallenged;
+	
+	/** The dim. */
 	private int dim;
 
+	/** The client handler p1. */
 	// IO streams
 	private ClientHandler clientHandlerP1;
+	
+	/** The client handler p2. */
 	private ClientHandler clientHandlerP2;
+	
+	/** The game. */
 	private Game game;
+	
+	/** The move has been made. */
 	public boolean moveHasBeenMade;
 
+	/** The observers. */
 	// Observers for a game
 	private List<ClientHandler> observers = new ArrayList<ClientHandler>();
 
 	// Thread observer class
+	/** The logger. */
 	//	private ServerThreadObserver mServerThreadObserver;
 	private Logger logger;
 
+	/**
+	 * Instantiates a new go game server.
+	 *
+	 * @param nameChallenger the name challenger
+	 * @param nameChallenged the name challenged
+	 * @param boardDim the board dim
+	 * @param strMarkChallenger the str mark challenger
+	 * @param clientHandlerP1 the client handler p1
+	 * @param clientHandlerP2 the client handler p2
+	 */
 	// Constructor
 	public GoGameServer(String nameChallenger, String nameChallenged, int boardDim, String strMarkChallenger,
 			//BufferedReader inChallenged, BufferedWriter outChallenged, BufferedReader inChallenger, BufferedWriter outChallenger) {
@@ -103,6 +135,9 @@ public class GoGameServer extends Thread implements Constants4, Observer, Additi
 		clientHandlerP2.setIsWaitingOnTurn(false);
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Thread#run()
+	 */
 	public void run() {	
 		// Check input
 		this.game = new Game(p1, p2, dim);//, clientHandlerP1, clientHandlerP2);
@@ -120,6 +155,11 @@ public class GoGameServer extends Thread implements Constants4, Observer, Additi
 		}
 	}
 
+	/**
+	 * Send message both.
+	 *
+	 * @param msg the msg
+	 */
 	public void sendMessageBoth(String msg) {
 		clientHandlerP1.sendMessageToClient(msg);
 		clientHandlerP2.sendMessageToClient(msg);
@@ -137,6 +177,11 @@ public class GoGameServer extends Thread implements Constants4, Observer, Additi
 	//
 	//	}
 
+	/**
+	 * Send message to observers.
+	 *
+	 * @param msg the msg
+	 */
 	protected void sendMessageToObservers(String msg) {
 		if (observers.size() > 0) {
 			for (ClientHandler currentObserver : observers) {
@@ -145,6 +190,11 @@ public class GoGameServer extends Thread implements Constants4, Observer, Additi
 		}
 	}
 
+	/**
+	 * Sent message to observers server.
+	 *
+	 * @param msg the msg
+	 */
 	protected void sentMessageToObserversServer(String msg) {
 		if (observers.size() > 0) {
 			for (ClientHandler currentObserver : observers) {
@@ -153,23 +203,46 @@ public class GoGameServer extends Thread implements Constants4, Observer, Additi
 		}
 	}
 
+	/**
+	 * Gets the current game.
+	 *
+	 * @return the current game
+	 */
 	// GETTERS AND SETTERS -----------------------------------
 	public Game getCurrentGame() {
 		return this.game;
 	}
 
+	/**
+	 * Adds the observer.
+	 *
+	 * @param observer the observer
+	 */
 	public void addObserver(ClientHandler observer) {
 		observers.add(observer);
 	}
 
+	/**
+	 * Removes the observer.
+	 *
+	 * @param observer the observer
+	 */
 	public void removeObserver(ClientHandler observer) {
 		observers.remove(observer);
 	}
 
+	/**
+	 * Gets the observers.
+	 *
+	 * @return the observers
+	 */
 	public List<ClientHandler> getObservers() {
 		return this.observers;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+	 */
 	@Override
 	public void update(Observable o, Object arg) {
 

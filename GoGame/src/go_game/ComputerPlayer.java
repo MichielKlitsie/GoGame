@@ -1,12 +1,26 @@
 package go_game;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class ComputerPlayer.
+ */
 public class ComputerPlayer extends Player {
+	
+	/** The strategy. */
 	// Instance variables;
 	private Strategy strategy;
+	
+	/** The mark. */
 	//private String namePlayer;
 	private Mark mark;
 	//private Board board;
 
+	/**
+	 * Instantiates a new computer player.
+	 *
+	 * @param mark the mark
+	 * @param strategy the strategy
+	 */
 	//
 	public ComputerPlayer(Mark mark, Strategy strategy) {
 		//super(this.namePlayer, mark);
@@ -15,11 +29,19 @@ public class ComputerPlayer extends Player {
 		this.mark = mark;
 	}
 	
+	/**
+	 * Instantiates a new computer player.
+	 *
+	 * @param mark the mark
+	 */
 	// When no strategy is inputted, the random strategy is chosen
 	public ComputerPlayer(Mark mark) {
 		this(mark, new RandomStrategy());
 	}
 
+	/* (non-Javadoc)
+	 * @see go_game.Player#determineMove(go_game.Board)
+	 */
 	// Determine move according to the strategy
 	@Override
 	public int determineMove(Board board) {
@@ -42,6 +64,9 @@ public class ComputerPlayer extends Player {
 		return choice;
 	}
 
+	/* (non-Javadoc)
+	 * @see go_game.Player#sentMessage(java.lang.String)
+	 */
 	@Override
 	public void sentMessage(String msg) {
 		// DO NOTHING?
@@ -49,6 +74,11 @@ public class ComputerPlayer extends Player {
 		
 	}
 	
+	/**
+	 * Gets the strategy.
+	 *
+	 * @return the strategy
+	 */
 	public Strategy getStrategy() {
 		return this.strategy;
 	}

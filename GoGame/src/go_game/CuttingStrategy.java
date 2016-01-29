@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class CuttingStrategy.
+ */
 // Wout's annoying cutting strategy
 public class CuttingStrategy implements Strategy  {
 
@@ -18,20 +22,30 @@ public class CuttingStrategy implements Strategy  {
 	// Make the move
 	//Bij passen na de laatste eigen??
 
+	/** The name strategy. */
 	private String nameStrategy;
+	
+	/** The next move. */
 	private int nextMove;
+	
 	/**
-	 * 
+	 * Instantiates a new cutting strategy.
 	 */
 	public CuttingStrategy() {
 		nameStrategy = "Wout-strategy";
 	}
 
+	/* (non-Javadoc)
+	 * @see go_game.Strategy#getName()
+	 */
 	@Override
 	public String getName() {
 		return this.nameStrategy;
 	}
 
+	/* (non-Javadoc)
+	 * @see go_game.Strategy#determineMove(go_game.Board, go_game.Mark)
+	 */
 	@Override
 	public int determineMove(Board b, Mark m) {
 		// Obtain last move from board.

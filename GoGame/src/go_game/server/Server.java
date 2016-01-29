@@ -21,20 +21,30 @@ import go_game.Mark;
 import go_game.Player;
 import go_game.protocol.Constants4;
 
+// TODO: Auto-generated Javadoc
 /**
  * Server. 
  * @author  Michiel Klitsie
  * @version $Revision: 1.1 $
  */
 public class Server extends Thread implements Constants4 {
+	
+	/** The Constant USAGE. */
 	private static final String USAGE
 	= "usage: " + Server.class.getName() + " <port>";
 
+	/** The Constant LOGGER. */
 	// Logging
 	public final static Logger LOGGER = Logger.getLogger(Server.class.getName());
+	
+	/** The server. */
 	public static Server server;
 	// Main ----------------------------------------------------------------------------------
-	/** Start een Server-applicatie op. */
+	/**
+	 *  Start een Server-applicatie op.
+	 *
+	 * @param args the arguments
+	 */
 	public static void main(String[] args) {
 		if (args.length != 1) {
 			System.out.println(USAGE);
@@ -66,19 +76,32 @@ public class Server extends Thread implements Constants4 {
 
 	}
 
+	/** The port. */
 	// Instance variables----------------------------------------------------------
 	private int port;
+	
+	/** The ssock. */
 	private ServerSocket ssock;
+	
+	/** The challenge partners. */
 	//	boolean nameIsTaken;
 	public HashMap<String, String> challengePartners = new HashMap<>();
+	
+	/** The m server thread observer. */
 	public static ServerThreadObserver mServerThreadObserver;
 
+	/** The client handler threads. */
 	private List<ClientHandler> clientHandlerThreads;
 
+	/** The invalid names. */
 	private List<String> invalidNames = Arrays.asList("Hitler", "Wout", "Joris");
 
 	// Constructor ----------------------------------------------------------------
-	/** Constructs a new Server object. */
+	/**
+	 *  Constructs a new Server object.
+	 *
+	 * @param portArg the port arg
+	 */
 	public Server(int portArg) {
 		try {
 			// Set the port 
@@ -104,11 +127,23 @@ public class Server extends Thread implements Constants4 {
 		}
 	}
 
+	/**
+	 * Creates the server socket.
+	 *
+	 * @param portArg the port arg
+	 * @return the server socket
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	protected ServerSocket createServerSocket(int portArg) throws IOException {
 		ServerSocket serversock = new ServerSocket(port);
 		return serversock;
 	}
 
+	/**
+	 * Gets the server socket.
+	 *
+	 * @return the server socket
+	 */
 	public ServerSocket getServerSocket(){
 		return this.ssock;
 	}
@@ -153,6 +188,12 @@ public class Server extends Thread implements Constants4 {
 
 	}
 
+	/**
+	 * Check double name.
+	 *
+	 * @param name the name
+	 * @return true, if successful
+	 */
 	public boolean checkDoubleName(String name) {
 		boolean nameIsTaken;
 		List<ClientHandler> listDoubleNames = getPlayersInLobby().stream().filter(p -> name.equals(p.getClientName().trim())).collect(Collectors.toList());
@@ -165,6 +206,12 @@ public class Server extends Thread implements Constants4 {
 		return nameIsTaken;
 	}
 
+	/**
+	 * Check not allowed name.
+	 *
+	 * @param name the name
+	 * @return true, if successful
+	 */
 	public boolean checkNotAllowedName(String name) {
 		boolean notAllowedName;
 		List<String> invalidNames = getInvalidNames().stream().filter(p -> name.equalsIgnoreCase(p)).collect(Collectors.toList());
@@ -177,6 +224,12 @@ public class Server extends Thread implements Constants4 {
 		return notAllowedName;
 	}
 
+	/**
+	 * Check invalid name.
+	 *
+	 * @param name the name
+	 * @return true, if successful
+	 */
 	public boolean checkInvalidName(String name) {
 		boolean inValidName;
 		String patternOneNumber = "[0-9]+";
@@ -184,6 +237,12 @@ public class Server extends Thread implements Constants4 {
 		return name.trim().isEmpty() || name.matches(patternOneNumber) || name.matches(patternContainsSpace); 
 	}
 
+	/**
+	 * Name suggestor.
+	 *
+	 * @param newName the new name
+	 * @return the string
+	 */
 	public String nameSuggestor(String newName) {
 		int i = 1;
 		while(checkDoubleName(newName)) {
@@ -195,6 +254,11 @@ public class Server extends Thread implements Constants4 {
 	}
 
 
+	/**
+	 * Prints the.
+	 *
+	 * @param message the message
+	 */
 	// Server functions ----------------------------------------------------------------------------------
 	public void print(String message){
 		System.out.println(message);
@@ -217,6 +281,11 @@ public class Server extends Thread implements Constants4 {
 		}
 	}
 
+	/**
+	 * Broadcast in lobby.
+	 *
+	 * @param msg the msg
+	 */
 	public void broadcastInLobby(String msg) {
 
 		LOGGER.log(Level.INFO,"Broadcasted to all clients in the lobby: " + msg);
@@ -251,6 +320,17 @@ public class Server extends Thread implements Constants4 {
 
 	// <-------------------------------------------------------------------------------
 	// <---- HIER GEBLEVEN ------------------------------------------------------------
+	/**
+	 * Start game thread.
+	 *
+	 * @param nameChallenger the name challenger
+	 * @param nameChallenged the name challenged
+	 * @param boardDim the board dim
+	 * @param strMarkChallenger the str mark challenger
+	 * @param clientHandlerP1 the client handler p1
+	 * @param clientHandlerP2 the client handler p2
+	 * @return the go game server
+	 */
 	// <-------------------------------------------------------------------------------
 	public GoGameServer startGameThread(String nameChallenger, String nameChallenged, int boardDim, String strMarkChallenger,  
 			//BufferedReader inChallenged, BufferedWriter outChallenged, BufferedReader inChallenger, BufferedWriter outChallenger) {
@@ -272,19 +352,40 @@ public class Server extends Thread implements Constants4 {
 		return goGameServer;
 	}
 
+	/**
+	 * Gets the all players.
+	 *
+	 * @return the all players
+	 */
 	// GETTERS AND SETTERS ---------------------------------------------------------------
 	public List<ClientHandler> getAllPlayers() {
 		return clientHandlerThreads;
 	}
 
+	/**
+	 * Gets the challenge partners.
+	 *
+	 * @return the challenge partners
+	 */
 	public HashMap<String, String> getChallengePartners() {
 		return this.challengePartners;
 	}
 
+	/**
+	 * Adds the challenge partners.
+	 *
+	 * @param nameChallenger the name challenger
+	 * @param nameToBeChallenged the name to be challenged
+	 */
 	public void addChallengePartners(String nameChallenger, String nameToBeChallenged) {
 		this.challengePartners.put(nameToBeChallenged, nameChallenger);
 	}
 
+	/**
+	 * Gets the players in lobby.
+	 *
+	 * @return the players in lobby
+	 */
 	// GET PEOPLE IN LOBBY
 	public List<ClientHandler> getPlayersInLobby() {
 		List<ClientHandler> allPlayers = getAllPlayers();
@@ -295,6 +396,11 @@ public class Server extends Thread implements Constants4 {
 		return clientHandlerThreadsInLobby;
 	}
 
+	/**
+	 * Gets the players playing.
+	 *
+	 * @return the players playing
+	 */
 	// GET PEOPLE PLAYING
 	public List<ClientHandler> getPlayersPlaying() {
 		List<ClientHandler> allPlayers = getAllPlayers();
@@ -305,6 +411,11 @@ public class Server extends Thread implements Constants4 {
 		return clientHandlerThreadsIsPlaying;
 	}
 
+	/**
+	 * Gets the players waiting for random play.
+	 *
+	 * @return the players waiting for random play
+	 */
 	public List<ClientHandler> getPlayersWaitingForRandomPlay() {
 		List<ClientHandler> allPlayers = getAllPlayers();
 		List<ClientHandler> clientHandlerThreadsIsPlaying = allPlayers.stream()
@@ -314,10 +425,20 @@ public class Server extends Thread implements Constants4 {
 		return clientHandlerThreadsIsPlaying;
 	}
 
+	/**
+	 * Gets the invalid names.
+	 *
+	 * @return the invalid names
+	 */
 	public List<String> getInvalidNames() {
 		return this.invalidNames ;
 	}
 
+	/**
+	 * Gets the server thread observer.
+	 *
+	 * @return the server thread observer
+	 */
 	public ServerThreadObserver getServerThreadObserver() {
 		return mServerThreadObserver;
 	}

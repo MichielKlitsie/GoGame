@@ -2,6 +2,7 @@ package go_game;
 
 import go_game.protocol.Constants4;
 
+// TODO: Auto-generated Javadoc
 /**
  * Represents a mark in the Go game. There three possible values:
  * Mark.XX, Mark.OO and Mark.EMPTY.
@@ -11,8 +12,17 @@ import go_game.protocol.Constants4;
  */
 public enum Mark implements Constants4 {
     
+	/** The empty. */
 	// 
-    EMPTY, WW, BB, HH, hh;
+    EMPTY, 
+ /** The ww. */
+ WW, 
+ /** The bb. */
+ BB, 
+ /** The hh. */
+ HH, 
+ /** The hh. */
+ hh;
 
     /*@
        ensures this == Mark.XX ==> \result == Mark.OO;
@@ -34,6 +44,11 @@ public enum Mark implements Constants4 {
         }
     }
     
+    /**
+     * To string nice incl hint.
+     *
+     * @return the string
+     */
     public String toStringNiceInclHint() {
     	if (this == WW) {
             return "W";
@@ -48,6 +63,11 @@ public enum Mark implements Constants4 {
         }
     }
     
+    /**
+     * To string for protocol.
+     *
+     * @return the string
+     */
     public String toStringForProtocol() {
     	if (this == WW) {
             return W;
@@ -58,6 +78,11 @@ public enum Mark implements Constants4 {
         }
     }
     
+    /**
+     * To string for protocol full.
+     *
+     * @return the string
+     */
     public String toStringForProtocolFull() {
     	if (this == WW) {
             return WHITE;

@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package go_game.server;
 
 import java.io.BufferedReader;
@@ -14,13 +17,18 @@ import go_game.protocol.Constants3;
 import go_game.protocol.Constants4;
 
 
+// TODO: Auto-generated Javadoc
 /**
  * Client class for a simple client-server application.
  * @author  Michiel Klitsie
  * @version $Revision: 1.1 $
  */
 public class Client extends Thread implements Constants4 {
-	private static final String USAGE = "usage: java week7.cmdchat.Client <name> <address> <port>";
+	
+	/** The Constant USAGE. */
+	private static final String USAGE = "usage: java go_game.server.Client <name> <address> <port>";
+	
+	/** The client. */
 	public static Client client;
 //	// SHUTDOWN HOOK
 //	public void attachShutDownHook(){
@@ -30,7 +38,11 @@ public class Client extends Thread implements Constants4 {
 //		 }
 	
 	// Main ----------------------------------------------------------------------------------
-	/** Start een Client-applicatie op. */
+	/**
+ *  Start een Client-applicatie op.
+ *
+ * @param args the arguments
+ */
 	public static void main(String[] args) {
 		if (args.length != 3) {
 			System.out.println(USAGE);
@@ -93,15 +105,27 @@ public class Client extends Thread implements Constants4 {
 
 	}
 
+	/** The client name. */
 	// Instance variables -------------------------------------------------------------
 	private String clientName;
+	
+	/** The socket. */
 	private Socket sock;
+	
+	/** The in. */
 	private BufferedReader in;
+	
+	/** The out. */
 	private BufferedWriter out;
 
 	// Constructor --------------------------------------------------------------------
 	/**
 	 * Constructs a Client-object and tries to make a socket connection.
+	 *
+	 * @param name the name
+	 * @param host the host
+	 * @param port the port
+	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	public Client(String name, InetAddress host, int port)
 			throws IOException {
@@ -145,7 +169,11 @@ public class Client extends Thread implements Constants4 {
 	}
 
 	// Client functions----------------------------------------------------------------
-	/** send a message to a ClientHandler. */
+	/**
+	 *  send a message to a ClientHandler.
+	 *
+	 * @param msg the msg
+	 */
 	public void sendMessage(String msg) {
 //		System.out.println(getClientName() + " sent: " + msg);
 		try {
@@ -178,15 +206,30 @@ public class Client extends Thread implements Constants4 {
 		}
 	}
 
-	/** returns the client name. */
+	/**
+	 *  returns the client name.
+	 *
+	 * @return the client name
+	 */
 	public String getClientName() {
 		return clientName;
 	}
 
+	/**
+	 * Prints the.
+	 *
+	 * @param message the message
+	 */
 	private static void print(String message) {
 		System.out.println(message);
 	}
 
+	/**
+	 * Read string.
+	 *
+	 * @param tekst the tekst
+	 * @return the string
+	 */
 	public static String readString(String tekst) {
 		System.out.print(tekst);
 		String antw = null;

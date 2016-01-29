@@ -8,13 +8,29 @@ import go_game.protocol.AdditionalConstants;
 import go_game.protocol.Constants4;
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class ClientIOParser.
+ */
 public class ClientIOParser implements Constants4, AdditionalConstants {
 
+	/** The client. */
 	private ClientParsing client;
+	
+	/** The parsed output string. */
 	private String parsedOutputString;
+	
+	/** The parsed input string. */
 	private String parsedInputString;
+	
+	/** The last board. */
 	private Board lastBoard;
 	
+	/**
+	 * Instantiates a new client io parser.
+	 *
+	 * @param client the client
+	 */
 	// Constructor
 	public ClientIOParser(ClientParsing client) {
 		this.client = client;
@@ -23,6 +39,12 @@ public class ClientIOParser implements Constants4, AdditionalConstants {
 
 	// ------------------------------------------
 	// Interpret the input
+	/**
+	 * Parses the input.
+	 *
+	 * @param inputString the input string
+	 * @return the string
+	 */
 	// ------------------------------------------
 	public String parseInput(String inputString) {
 		String stringAfterCommand = "";
@@ -238,6 +260,12 @@ public class ClientIOParser implements Constants4, AdditionalConstants {
 	
 	// ------------------------------------------
 	// Change the output for sending over the socket
+	/**
+	 * Parses the output.
+	 *
+	 * @param outputString the output string
+	 * @return the string
+	 */
 	// ------------------------------------------
 	public String parseOutput(String outputString) {
 		String[] stringParts = outputString.split(DELIMITER);
@@ -283,6 +311,12 @@ public class ClientIOParser implements Constants4, AdditionalConstants {
 		return parsedOutputString;
 	}
 	
+	/**
+	 * Show board.
+	 *
+	 * @param stringBoard the string board
+	 * @return the string
+	 */
 	public String showBoard(String stringBoard) {
 //		System.out.println("Parsing board on client side");
 		Board clientBoard = createBoardFromStringRepresentation(stringBoard);
@@ -290,6 +324,12 @@ public class ClientIOParser implements Constants4, AdditionalConstants {
 		return clientBoard.toStringOnCommandLine();
 	}
 
+	/**
+	 * Creates the board from string representation.
+	 *
+	 * @param stringBoard the string board
+	 * @return the board
+	 */
 	public Board createBoardFromStringRepresentation(String stringBoard) {
 		stringBoard = stringBoard.trim();
 		Double dimDouble = (Math.sqrt(stringBoard.length()));

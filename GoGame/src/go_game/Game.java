@@ -11,6 +11,7 @@ import go_game.protocol.Constants4;
 import go_game.server.ClientHandler;
 import go_game.server.GameTimer;
 
+// TODO: Auto-generated Javadoc
 /**
  * Class for maintaining the Go game. 
  * 
@@ -21,6 +22,7 @@ public class Game extends Observable implements Constants4 {
 
 	// -- Instance variables -----------------------------------------
 
+	/** The Constant NUMBER_PLAYERS. */
 	public static final int NUMBER_PLAYERS = 2;
 
 	/*@
@@ -47,18 +49,43 @@ public class Game extends Observable implements Constants4 {
 	 * Index of the current player.
 	 */
 	private int current;
+	
+	/** The previous turn passed. */
 	private boolean previousTurnPassed;
+	
+	/** The is game over. */
 	private boolean isGameOver;	
+	
+	/** The prematurely quit. */
 	private boolean prematurelyQuit;
+	
+	/** The doorgaan. */
 	private boolean doorgaan = true;
+	
+	/** The last move. */
 	private int[] lastMove = {-999, -999};
+	
+	/** The is valid move. */
 	private boolean isValidMove;
+	
+	/** The choice. */
 	private int choice;
 
+	/**
+	 * Gets the last move.
+	 *
+	 * @return the last move
+	 */
 	public int[] getLastMove() {
 		return this.lastMove;
 	}
 
+	/**
+	 * Sets the last move.
+	 *
+	 * @param lastXco the last xco
+	 * @param lastYco the last yco
+	 */
 	public void setLastMove(int lastXco, int lastYco) {
 		this.lastMove[0] = lastXco;
 		this.lastMove[1] = lastYco;
@@ -72,11 +99,10 @@ public class Game extends Observable implements Constants4 {
 	 */
 	/**
 	 * Creates a new Game object.
-	 * 
-	 * @param s0
-	 *            the first player
-	 * @param s1
-	 *            the second player
+	 *
+	 * @param s0            the first player
+	 * @param s1            the second player
+	 * @param dim the dim
 	 */
 	public Game(Player s0, Player s1, int dim) {//, ClientHandler clientHandlerP1, ClientHandler clientHandlerP2) {
 		// Create a board
@@ -247,12 +273,18 @@ public class Game extends Observable implements Constants4 {
 		closeGame();
 	}
 
+	/**
+	 * Send invalid move.
+	 */
 	private void sendInvalidMove() {
 		sendMessageToBoth(FAILURE + DELIMITER + INVALIDMOVE);
 		setChanged();
 		notifyObservers(FAILURE + DELIMITER + INVALIDMOVE);
 	}
 
+	/**
+	 * Send current turn.
+	 */
 	protected void sendCurrentTurn() {
 		players[current].sentMessage(CHAT + DELIMITER + "Your turn\n");
 		players[(current + 1) % 2].sentMessage(CHAT + DELIMITER + "Wait until opponent made his choice.\n");
@@ -260,6 +292,9 @@ public class Game extends Observable implements Constants4 {
 		notifyObservers("TURNSWITCH");
 	}
 
+	/**
+	 * Send message time out.
+	 */
 	protected void sendMessageTimeOut() {
 		players[(current + 1)%2].sentMessage(CHAT + DELIMITER + "\nYour opponent took to long, you have won the game. Going back to the lobby!");
 		players[(current + 1)%2].sentMessage(GAMEOVER + DELIMITER + VICTORY);
@@ -269,6 +304,9 @@ public class Game extends Observable implements Constants4 {
 		players[(current + 1) % 2].sentMessage(TIMEOUTEXCEEDED);
 	}
 
+	/**
+	 * Close game.
+	 */
 	public void closeGame() {
 		//		System.out.println("Kom ik bij de close game?");
 		this.doorgaan = false;
@@ -288,6 +326,9 @@ public class Game extends Observable implements Constants4 {
 
 	}
 
+	/**
+	 * Send board string.
+	 */
 	protected void sendBoardString() {
 		String strBoardMessage = CHAT + DELIMITER + "\n Current game situation: \n\n" + board.toStringOnCommandLine()
 		+ "\n";
@@ -296,6 +337,9 @@ public class Game extends Observable implements Constants4 {
 		notifyObservers(strBoardMessage);
 	}
 
+	/**
+	 * Send move protocol.
+	 */
 	protected void sendMoveProtocol() {
 		String strLastMoveMade = "";
 		if (choice == -1) {
@@ -308,6 +352,9 @@ public class Game extends Observable implements Constants4 {
 		notifyObservers(strLastMoveMade);
 	}
 
+	/**
+	 * Send board protocol.
+	 */
 	protected void sendBoardProtocol() {
 		int blackCaptives = players[0].getPrisonersTaken();
 		int whiteCaptives = players[1].getPrisonersTaken();
@@ -359,11 +406,19 @@ public class Game extends Observable implements Constants4 {
 		}
 	}
 
+	/**
+	 * Prints the rules.
+	 */
 	private void printRules() {
 		// TODO: PRINT RULES: Misschien handig om te implementeren
 	}
 
 
+	/**
+	 * Send message to both.
+	 *
+	 * @param strBoardMessage the str board message
+	 */
 	private void sendMessageToBoth(String strBoardMessage) {
 		players[0].sentMessage(strBoardMessage);
 		//clientHandlerP1.sendMessageToClient(strBoardMessage);
@@ -371,6 +426,13 @@ public class Game extends Observable implements Constants4 {
 		players[1].sentMessage(strBoardMessage);
 	}
 
+	/**
+	 * Check legal move.
+	 *
+	 * @param xCo the x co
+	 * @param yCo the y co
+	 * @return true, if successful
+	 */
 	// LEGAL MOVE CHECKER AND APPLY RULES OF GAME!!! --------------------------------
 	public boolean checkLegalMove(int xCo, int yCo) {
 		boolean validMove = false;
@@ -379,6 +441,12 @@ public class Game extends Observable implements Constants4 {
 		return validMove; 	
 	}
 
+	/**
+	 * Check legal move.
+	 *
+	 * @param indexField the index field
+	 * @return true, if successful
+	 */
 	public boolean checkLegalMove(int indexField) {
 		boolean validMove = false;
 		if(board.isField(indexField) && board.isEmptyField(indexField)) {
@@ -389,6 +457,13 @@ public class Game extends Observable implements Constants4 {
 		return validMove; 	
 	}
 
+	/**
+	 * Check rules move.
+	 *
+	 * @param board the board
+	 * @param keuze the keuze
+	 * @return true, if successful
+	 */
 	public boolean checkRulesMove(Board board, int keuze) {
 		boolean isValidMove = false;
 
@@ -436,15 +511,30 @@ public class Game extends Observable implements Constants4 {
 		return isValidMove;
 	}
 
+	/**
+	 * Gets the current board.
+	 *
+	 * @return the current board
+	 */
 	// GETTERS AND SETTERS
 	public Board getCurrentBoard() {
 		return this.board;
 	}
 
+	/**
+	 * Gets the game has ended.
+	 *
+	 * @return the game has ended
+	 */
 	public boolean getGameHasEnded() {
 		return this.doorgaan;
 	}
 	
+	/**
+	 * Gets the players.
+	 *
+	 * @return the players
+	 */
 	public Player[] getPlayers() {
 		return players;
 	}

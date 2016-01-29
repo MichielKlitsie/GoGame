@@ -12,6 +12,7 @@ import java.net.UnknownHostException;
 import go_game.protocol.Constants3;
 import go_game.protocol.Constants4;
 
+// TODO: Auto-generated Javadoc
 /**
  * Client class for a simple client-server application.
  * @author  Michiel Klitsie
@@ -20,7 +21,11 @@ import go_game.protocol.Constants4;
 public class ClientParsing extends Thread implements Constants4 {
 
 	// Main, When starting command line ----------------------------------------------------------------------------------
-	/** Start een Client-applicatie op. */
+	/**
+	 *  Start een Client-applicatie op.
+	 *
+	 * @param args the arguments
+	 */
 	public static void main(String[] args) {
 		if (args.length != 3) {
 			System.out.println(USAGE);
@@ -91,7 +96,12 @@ public class ClientParsing extends Thread implements Constants4 {
 
 	}
 	
-	/** Read strings, used in the static main function. */
+	/**
+	 *  Read strings, used in the static main function.
+	 *
+	 * @param tekst the tekst
+	 * @return the string
+	 */
 	public static String readString(String tekst) {
 		System.out.print(tekst);
 		String antw = null;
@@ -105,7 +115,11 @@ public class ClientParsing extends Thread implements Constants4 {
 		return (antw == null) ? "" : antw;
 	}
 	
-	/** send a message to a ClientHandler. */
+	/**
+	 *  send a message to a ClientHandler.
+	 *
+	 * @param msg the msg
+	 */
 	public void sendMessage(String msg) {
 		//			System.out.println(getClientName() + " sent: " + msg);
 		try {
@@ -118,24 +132,48 @@ public class ClientParsing extends Thread implements Constants4 {
 		}
 	}
 	
-	/** Additional writing, instead of System.out.println. */
+	/**
+	 *  Additional writing, instead of System.out.println.
+	 *
+	 * @param message the message
+	 */
 	public static void print(String message) {
 		System.out.println(message);
 	}
 
+	/** The client name. */
 	// Instance variables -------------------------------------------------------------
 	private String clientName;
+	
+	/** The sock. */
 	private Socket sock;
+	
+	/** The in. */
 	private BufferedReader in;
+	
+	/** The out. */
 	private BufferedWriter out;
+	
+	/** The m client io parser. */
 	private ClientIOParser mClientIOParser;
+	
+	/** The terminated. */
 	private static boolean terminated;
-	private static final String USAGE = "usage: java week7.cmdchat.Client <name> <address> <port>";
+	
+	/** The Constant USAGE. */
+	private static final String USAGE = "usage: java go_game.server.ClientParsing <name> <address> <port>";
+	
+	/** The client. */
 	public static ClientParsing client;
 
 	// Constructor --------------------------------------------------------------------
 	/**
 	 * Constructs a Client-object and tries to make a socket connection.
+	 *
+	 * @param name the name
+	 * @param host the host
+	 * @param port the port
+	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	public ClientParsing(String name, InetAddress host, int port)
 			throws IOException {
@@ -208,12 +246,20 @@ public class ClientParsing extends Thread implements Constants4 {
 	// --------------------------------
 	// GETTERS AND SETTERS
 	// --------------------------------
-	/** returns the client name. */
+	/**
+	 *  returns the client name.
+	 *
+	 * @return the client name
+	 */
 	public String getClientName() {
 		return clientName;
 	}
 	
-	/** returns the client name. */
+	/**
+	 *  returns the client name.
+	 *
+	 * @param newName the new client name
+	 */
 	public void setClientName(String newName) {
 		this.clientName = newName;
 	}
