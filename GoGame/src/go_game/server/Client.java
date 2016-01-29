@@ -242,4 +242,8 @@ public class Client extends Thread implements Constants4 {
 
 		return (antw == null) ? "" : antw;
 	}
+	
+	public Socket getSocket() {
+		return this.sock;
+	}
 }

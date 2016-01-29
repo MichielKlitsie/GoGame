@@ -80,6 +80,12 @@ public class Server extends Thread implements Constants4 {
 	// Instance variables----------------------------------------------------------
 	private int port;
 	
+	// Purely for testing purposes
+	private List<Socket> socks = new ArrayList<Socket>();
+	public List<Socket> getSocks(){
+		return this.socks;
+	}
+	
 	/** The ssock. */
 	private ServerSocket ssock;
 	
@@ -164,6 +170,8 @@ public class Server extends Thread implements Constants4 {
 
 				LOGGER.log(Level.INFO, waitingMessage);
 				Socket sock = ssock.accept();
+				socks.add(sock);
+				
 				//				System.out.println("Cliented connected, starting handler...");
 				// Retrieve clients name
 

@@ -867,7 +867,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 		case GETEXTENSIONS:
 			//TODO OPTIONELE COMMANDOS
 			clientHandler.sendMessageToClient(CHAT + DELIMITER + LINEBREAK + "Additional commands are: \n 1. GETSTATUS \n 2. TBA \n" + LINEBREAK+ "\n");
-			clientHandler.sendMessageToClient(EXTENSIONS + DELIMITER + GETSTATUS+ "\n");
+			clientHandler.sendMessageToClient(EXTENSIONS + DELIMITER + GETSTATUS + DELIMITER + CHAT + DELIMITER + CHALLENGE + DELIMITER + CHANGENAME + DELIMITER + GETALLTHREADS + "\n");
 			break;
 		case EXTENSIONS:
 			//TODO, lijst van optionele commando's sturen
@@ -883,6 +883,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 					"\nObserving: " + isObserving +
 					"\nWaiting for a random play: " + isWaitingOnRandomPlay + "\n" + LINEBREAK ;
 			clientHandler.sendMessageToClient(STATUS + DELIMITER + statusString+ "\n");
+			clientHandler.sendMessageToClient(CHAT + DELIMITER + statusString+ "\n");
 			break;
 			// REMOVING THREAD
 		case CLIENTEXIT:
