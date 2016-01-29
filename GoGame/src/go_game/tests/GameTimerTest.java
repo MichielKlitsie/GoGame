@@ -7,6 +7,8 @@ import java.util.TimerTask;
 import org.junit.Before;
 import org.junit.Test;
 
+import go_game.HumanPlayer;
+import go_game.server.ClientHandler;
 import go_game.server.GameTimer;
 
 public class GameTimerTest {
@@ -16,7 +18,9 @@ public class GameTimerTest {
 	@Before
 	public void setUp() throws Exception {
 //		gameTimerTask = new GameTimer();
-		
+		Server server = new Server();
+		ClientHandler ch1 = new ClientHandler(serverArg, sockArg)
+		Player p1 = new HumanPlayer()
 		gameTimer = new GameTimer(10, null);
 		System.out.println("Set up done");
 		

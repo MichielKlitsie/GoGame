@@ -94,7 +94,7 @@ public class Server extends Thread implements Constants4 {
 	private List<ClientHandler> clientHandlerThreads;
 
 	/** The invalid names. */
-	private List<String> invalidNames = Arrays.asList("Hitler", "Wout", "Joris");
+	private List<String> invalidNames = Arrays.asList("Hitler", "Wout", "Joris", "asdf");
 
 	// Constructor ----------------------------------------------------------------
 	/**

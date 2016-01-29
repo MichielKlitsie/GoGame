@@ -402,10 +402,17 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND + "\n");
 				break;
 			} else {
+				Game currentGame = clientHandler.getCurrentGameServer().getCurrentGame();
+				Player[] players = currentGame.getPlayers();
+				Board currentBoard = currentGame.getCurrentBoard();
 				// Obtain the string representation of the board
-				String stringBoard = clientHandler.getProtocolStringRepresentationBoard();
-				System.out.println("Board status sent: " + stringBoard);
-				clientHandler.sendMessageToClient(BOARD + DELIMITER + stringBoard + "\n");
+				int blackCaptives = players[0].getPrisonersTaken();
+				int whiteCaptives = players[1].getPrisonersTaken();
+				String strRepresentationBoard = BOARD + DELIMITER + currentBoard.createStringRepresentationBoard(currentBoard) + DELIMITER + blackCaptives + DELIMITER + whiteCaptives;
+				
+//				String stringBoard = clientHandler.getProtocolStringRepresentationBoard();
+				System.out.println("Board status sent: " + strRepresentationBoard);
+				clientHandler.sendMessageToClient(BOARD + DELIMITER + strRepresentationBoard + "\n");
 				break;
 			}
 			//		case BOARD: 
