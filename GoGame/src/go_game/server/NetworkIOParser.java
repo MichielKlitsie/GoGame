@@ -132,13 +132,13 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 
 		// GENERAL commands ------------------------------------------
 		case VERSION:
-			clientHandler.sendMessageToClient("Current protocol version: " + VERSION);
+			clientHandler.sendMessageToClient(CHAT + DELIMITER + "Current protocol version: " + VERSION+ "\n");
 			break;
 		case "SERVER_PORT":
-			clientHandler.sendMessageToClient("Current server port: " + SERVER_PORT);
+			clientHandler.sendMessageToClient(CHAT + DELIMITER + "Current server port: " + SERVER_PORT+ "\n");
 			break;
 		case "TIMEOUTSECONDS":
-			clientHandler.sendMessageToClient("Current you have " + TIMEOUTSECONDS + " seconds until time-out");
+			clientHandler.sendMessageToClient(CHAT + DELIMITER + "Current you have " + TIMEOUTSECONDS + " seconds until time-out"+ "\n");
 			break;
 
 
@@ -155,7 +155,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 				//				clientHandler.sendMessageToServer(GETOPTIONS);
 				//				clientHandler.sendMessageToServer(NEWPLAYERACCEPTED);
 			} else {
-				clientHandler.sendMessageToClient(FAILURE + DELIMITER + UNKNOWNCOMMAND);
+				clientHandler.sendMessageToClient(FAILURE + DELIMITER + UNKNOWNCOMMAND + "\n");
 			}
 			break;
 
@@ -166,25 +166,25 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 		case GETOPTIONS: 
 			// TODO REARRANGE ACCORDING TO OPTIONS
 			if (this.isPendingChallenge) {
-				clientHandler.sendMessageToClient(CHAT + DELIMITER + LINEBREAK + clientHandler.getOptionsPendingChallenge() + LINEBREAK);
-				clientHandler.sendMessageToClient(OPTIONS + DELIMITER + CANCEL + QUIT + DELIMITER + GETOPTIONS);
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + LINEBREAK + clientHandler.getOptionsPendingChallenge() + LINEBREAK + "\n");
+				clientHandler.sendMessageToClient(OPTIONS + DELIMITER + CANCEL + QUIT + DELIMITER + GETOPTIONS + "\n");
 			} else if (this.isInLobby) {
-				clientHandler.sendMessageToClient(CHAT + DELIMITER + LINEBREAK + clientHandler.getOptionsLobby() + LINEBREAK );
-				clientHandler.sendMessageToClient(OPTIONS + DELIMITER + QUIT + DELIMITER + GETOPTIONS);
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + LINEBREAK + clientHandler.getOptionsLobby() + LINEBREAK  + "\n");
+				clientHandler.sendMessageToClient(OPTIONS + DELIMITER + QUIT + DELIMITER + GETOPTIONS + "\n");
 			} else if (this.isPlaying) {
-				clientHandler.sendMessageToClient(CHAT + DELIMITER + LINEBREAK + clientHandler.getOptionsGame() + LINEBREAK );
-				clientHandler.sendMessageToClient(OPTIONS + DELIMITER + QUIT + DELIMITER + GETOPTIONS);
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + LINEBREAK + clientHandler.getOptionsGame() + LINEBREAK  + "\n");
+				clientHandler.sendMessageToClient(OPTIONS + DELIMITER + QUIT + DELIMITER + GETOPTIONS + "\n");
 			} else if (this.isWaitingOnTurn) {
-				clientHandler.sendMessageToClient(CHAT + DELIMITER + LINEBREAK + clientHandler.getOptionsWaitingOnMove() + LINEBREAK );
-				clientHandler.sendMessageToClient(OPTIONS + DELIMITER + QUIT + DELIMITER + GETOPTIONS);
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + LINEBREAK + clientHandler.getOptionsWaitingOnMove() + LINEBREAK  + "\n");
+				clientHandler.sendMessageToClient(OPTIONS + DELIMITER + QUIT + DELIMITER + GETOPTIONS + "\n");
 			} else if (this.isObserving) {
-				clientHandler.sendMessageToClient(CHAT+ DELIMITER + LINEBREAK + clientHandler.getOptionsObserving() + LINEBREAK );
-				clientHandler.sendMessageToClient(OPTIONS + DELIMITER + QUIT + DELIMITER + GETOPTIONS);
+				clientHandler.sendMessageToClient(CHAT+ DELIMITER + LINEBREAK + clientHandler.getOptionsObserving() + LINEBREAK  + "\n");
+				clientHandler.sendMessageToClient(OPTIONS + DELIMITER + QUIT + DELIMITER + GETOPTIONS + "\n");
 			} else if (this.isObserving) {
-				clientHandler.sendMessageToClient(CHAT+ DELIMITER + LINEBREAK + clientHandler.getOptionsIsInWaitingRoom() + LINEBREAK );
-				clientHandler.sendMessageToClient(OPTIONS + DELIMITER + QUIT + DELIMITER + GETOPTIONS);
+				clientHandler.sendMessageToClient(CHAT+ DELIMITER + LINEBREAK + clientHandler.getOptionsIsInWaitingRoom() + LINEBREAK  + "\n");
+				clientHandler.sendMessageToClient(OPTIONS + DELIMITER + QUIT + DELIMITER + GETOPTIONS + "\n");
 			} else {
-				clientHandler.sendMessageToClient(FAILURE + " Your current state is unclear... Sorry!");
+				clientHandler.sendMessageToClient(FAILURE + " Your current state is unclear... Sorry!"+ "\n");
 			}
 
 			break;
@@ -195,13 +195,13 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 
 		case PLAY:
 			if (this.isPendingChallenge || this.isPlaying) {
-				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
+				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND + "\n");
 				break;
 			} else {
 				List<ClientHandler> listOfPlayersWaiting = getListOfPlayersWaitingForRandomPlay();
 
 				if (listOfPlayersWaiting.size() == 0) {
-					clientHandler.sendMessageToClient(WAITFOROPPONENT);
+					clientHandler.sendMessageToClient(WAITFOROPPONENT + "\n");
 					clientHandler.setIsWaitingForRandomPlay(true);
 					clientHandler.setIsInLobby(false);
 					server.broadcast(CHAT + DELIMITER + "[" + clientHandler.getClientName() + " is waiting on somebody to write 'PLAY']\n");
@@ -216,7 +216,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 					
 					// GAMESTART PERSON CHALLENGED
 					String gameArgs = nameChallenged + DELIMITER + BOARDSIZE + DELIMITER + WHITE; 
-					clientHandler.sendMessageToClient(GAMESTART + DELIMITER + gameArgs);
+					clientHandler.sendMessageToClient(GAMESTART + DELIMITER + gameArgs + "\n");
 //					clientHandler.setWaitingForRandomPlay(false);
 					clientHandler.setClientHandlerOpponent(clientHandlerOpponent);
 
@@ -238,7 +238,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 			// TODO: ONLY FOR PARSING CLIENT SIDE?
 		case WAITFOROPPONENT:
 			if (this.isPendingChallenge || this.isInWaitingRoom || this.isWaitingOnRandomPlay || this.isPlaying || this.isObserving ) {
-				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
+				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND + "\n");
 				break;
 			} else if (this.isInLobby) {
 				clientHandler.sendMessageToClient(CHAT + DELIMITER + "Wait for an opponent to play as well. \n");
@@ -248,7 +248,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 
 		case GAMESTART: 
 			if (this.isPlaying) {
-				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
+				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND + "\n");
 				break;
 			} else {
 				if (amountArgs == 3) {
@@ -286,7 +286,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 //					clientHandler.sendGameStartToServer(nameChallenger, nameChallenged, 9, BLACK, clientHandler);
 				} else {
 					// Do Nothing
-					clientHandler.sendMessageToClient(FAILURE + DELIMITER + ARGUMENTSMISSING);
+					clientHandler.sendMessageToClient(FAILURE + DELIMITER + ARGUMENTSMISSING + "\n");
 				}
 				break;
 			}
@@ -297,10 +297,10 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 			// ------------------------------------------------------------------
 		case MOVE:
 			if (this.isPendingChallenge || this.isInLobby) {
-				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
+				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND + "\n");
 			} else {
 				if (isWaitingOnTurn) {
-					clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTYOURTURN);
+					clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTYOURTURN + "\n");
 				} else {
 					int xCo = -1;
 					int yCo = -1;
@@ -325,7 +325,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 
 						} else if (singleInputArg.matches(patternOneLetter)) {
 							// INPUT SINGLE LETTER
-							clientHandler.sendMessageToClient(FAILURE + DELIMITER + INVALIDMOVE);
+							clientHandler.sendMessageToClient(FAILURE + DELIMITER + INVALIDMOVE + "\n");
 
 						} else if (singleInputArg.matches(patternOneNumber)) {
 							System.out.println("Parsing the one argument move command");
@@ -336,7 +336,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 
 						} else {
 							// OR ELSE....
-							clientHandler.sendMessageToClient(FAILURE + DELIMITER + INVALIDMOVE);
+							clientHandler.sendMessageToClient(FAILURE + DELIMITER + INVALIDMOVE + "\n");
 						}
 
 
@@ -365,13 +365,13 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 							clientHandler.sentParsedMoveToGoGameServer(xCo, yCo);
 
 						} else {
-							clientHandler.sendMessageToClient(FAILURE + DELIMITER + INVALIDMOVE);
+							clientHandler.sendMessageToClient(FAILURE + DELIMITER + INVALIDMOVE + "\n");
 						}
 						// If the user inputted a pass, continue with value -1	
 					} else if (amountArgs >= 3) {
-						clientHandler.sendMessageToClient(FAILURE + DELIMITER + ARGUMENTSMISSING);
+						clientHandler.sendMessageToClient(FAILURE + DELIMITER + ARGUMENTSMISSING + "\n");
 					} else {
-						clientHandler.sendMessageToClient(FAILURE + DELIMITER + ARGUMENTSMISSING);
+						clientHandler.sendMessageToClient(FAILURE + DELIMITER + ARGUMENTSMISSING + "\n");
 					}
 				}
 			}
@@ -379,10 +379,10 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 
 		case PASS:
 			if (this.isPendingChallenge || this.isInLobby) {
-				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
+				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND + "\n");
 			} else {
 				// Send the MOVE COMMAND INCLUDING PASS
-				clientHandler.sendMessageToServer(MOVE + DELIMITER + PASS);
+				clientHandler.sendMessageToServer(MOVE + DELIMITER + PASS + "\n");
 			}
 			break;
 		case GETHINT:
@@ -391,21 +391,21 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 				Board currentBoard = clientHandler.getCurrentGameServer().getCurrentGame().getCurrentBoard();
 				Strategy randomStrategy = new RandomStrategy(); 
 				int index = randomStrategy.determineMove(currentBoard, clientHandler.getLastMark());
-				clientHandler.sendMessageToClient(HINT + DELIMITER + currentBoard.getRow(index) + DELIMITER + currentBoard.getCol(index));
+				clientHandler.sendMessageToClient(HINT + DELIMITER + currentBoard.getRow(index) + DELIMITER + currentBoard.getCol(index) + "\n");
 			} else {
-				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
+				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND + "\n");
 			}
 			break;
 			// TODO: BOARD SENDING....	
 		case GETBOARD: 
 			if (this.isPendingChallenge || this.isInLobby) {
-				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
+				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND + "\n");
 				break;
 			} else {
 				// Obtain the string representation of the board
 				String stringBoard = clientHandler.getProtocolStringRepresentationBoard();
 				System.out.println("Board status sent: " + stringBoard);
-				clientHandler.sendMessageToClient(BOARD + DELIMITER + stringBoard);
+				clientHandler.sendMessageToClient(BOARD + DELIMITER + stringBoard + "\n");
 				break;
 			}
 			//		case BOARD: 
@@ -446,18 +446,18 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 
 				//				break;
 			} else if (this.isWaitingOnRandomPlay) {
-				clientHandler.sendMessageToClient(CHAT + DELIMITER + "You are back in the lobby!");
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "You are back in the lobby!" + "\n");
 				clientHandler.setIsInLobby(true);
 				clientHandler.setIsWaitingForRandomPlay(false);
 				// TODO: AND LET THE SERVER KNOW THE PLAYING STATUS IS RETRACTED
 			} else if (this.isObserving) {
 				clientHandler.setIsObserving(false);
 				clientHandler.setObserverModeOff();
-				clientHandler.sendMessageToClient("You stopped observing the game\n");
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "You stopped observing the game"+ "\n");
 				clientHandler.setIsInLobby(true);
 			} else if (this.isPlaying) {
 				// Step 1: PERSON SENDING QUIT
-				clientHandler.sendMessageToClient("Quiting game...");
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "Quiting game..." + "\n");
 				clientHandler.getCurrentGameServer().getCurrentGame().closeGame();
 				// Step 2: SENDING QUIT TO OPPONENT, is that opponent is still playing 
 //				if (clientHandler.getClientHandlerOpponent().getIsPlaying()) {
@@ -469,10 +469,10 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 			} else if (this.isObserving) {
 				clientHandler.setIsObserving(false);
 				clientHandler.setObserverModeOff();
-				clientHandler.sendMessageToClient(CHAT + DELIMITER + "You stopped observing the game\n");
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "You stopped observing the game"+ "\n");
 				clientHandler.setIsInLobby(true);
 			} else if (this.isInLobby) {
-				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
+				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND + "\n");
 			}
 			break;
 		case QUIT: 
@@ -480,7 +480,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 			//			 if (this.isInLobby) {
 //			server.removeHandler(clientHandler);
 //			clientHandler.getServer().removeHandler();
-//			clientHandler.sendMessageToClient("[" + clientHandler.getClientName() + "has left the server]");
+//			clientHandler.sendMessageToClient(CHAT + DELIMITER + "[" + clientHandler.getClientName() + "has left the server]");
 			clientHandler.shutdown();
 //			clientHandler.interrupt();
 			System.out.println("Networkparser parsed QUIT");
@@ -498,9 +498,9 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 			clientHandler.setIsPlaying(false);
 			clientHandler.setIsObserving(false);
 			clientHandler.setIsWaitingOnTurn(false);
-			clientHandler.sendMessageToClient(GAMEOVER);
-			clientHandler.sendMessageToClient(CHAT + DELIMITER + "Welcome back in the lobby!");
-			server.broadcast(CHAT + DELIMITER + "[" + clientHandler.getClientName() + " is back in the lobby]\n");
+			clientHandler.sendMessageToClient(GAMEOVER+ "\n");
+			clientHandler.sendMessageToClient(CHAT + DELIMITER + "Welcome back in the lobby!" + "\n");
+			server.broadcast(CHAT + DELIMITER + "[" + clientHandler.getClientName() + " is back in the lobby]" + "\n");
 			break;
 			// Arguments
 			//			case BOARDSIZE : d = 1; break;
@@ -511,7 +511,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 			// Options ---------------------------------------------------------------
 		case CHAT:
 			String chatMessage = CHAT + DELIMITER + clientHandler.getClientName() + ": " + 
-					inputString.substring(command.length());
+					inputString.substring(command.length()) + "\n";
 
 			// Get if the player is in the lobby or playing a game...
 			if(this.isInLobby) {
@@ -532,7 +532,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 			// ---------------------------------------------------------------
 		case CHALLENGE:
 			if (this.isPlaying || this.isPendingChallenge) {
-				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
+				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND + "\n");
 				break; 
 			} else {
 				// SHOW A LIST OF AVAILABLE CHALLENGERS
@@ -543,8 +543,8 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 					List<ClientHandler> listPlayersInLobby = getListOfPlayersInLobby();
 					String s = LINEBREAK + "Players in the lobby: \n";
 					s = s + createStringOfListPlayers(listPlayersInLobby) + LINEBREAK;
-					clientHandler.sendMessageToClient(CHAT + DELIMITER + s);
-					clientHandler.sendMessageToClient(AVAILABLEPLAYERS + DELIMITER + createSimpleStringOfListPlayers(listPlayersInLobby));
+					clientHandler.sendMessageToClient(CHAT + DELIMITER + s + "\n");
+					clientHandler.sendMessageToClient(AVAILABLEPLAYERS + DELIMITER + createSimpleStringOfListPlayers(listPlayersInLobby) + "\n");
 
 					// CHALLENGE A SPECIFIC PLAYER
 				} else if (amountArgs == 1) {
@@ -556,7 +556,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 					if (nameToBeChallenged.equals(nameChallenger)) {
 						//						String challengeSelfMessage = "You cannot challenge yourself, try again.";
 						//						clientHandler.sendMessageToClient(challengeSelfMessage);
-						clientHandler.sendMessageToClient(FAILURE + DELIMITER + PLAYERNOTAVAILABLE);
+						clientHandler.sendMessageToClient(FAILURE + DELIMITER + PLAYERNOTAVAILABLE + "\n");
 						clientHandler.setPendingChallengeStatus(false);
 						break;
 					}
@@ -570,13 +570,13 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 
 								if (!temp.getIsAlreadyChallenged()) {
 									// CHALLENGER SIDE
-									clientHandler.sendMessageToClient(YOUVECHALLENGED + DELIMITER + nameToBeChallenged);
+									clientHandler.sendMessageToClient(YOUVECHALLENGED + DELIMITER + nameToBeChallenged + "\n");
 									clientHandler.setPendingChallengeStatus(true);
 									// Disabling the lobby functionallity
 									clientHandler.setIsInLobby(false);
 
 									// TO BE CHALLENGED SIDE
-									temp.sendMessageToClient(YOURECHALLENGED + DELIMITER + nameChallenger);
+									temp.sendMessageToClient(YOURECHALLENGED + DELIMITER + nameChallenger + "\n");
 									//									temp.sendMessageToClient("You are challenged by '" + nameChallenger + "', respond with '" + CHALLENGEACCEPTED + "' or '" + CHALLENGEDENIED + "'.");
 									temp.setIsAlreadyChallenged(true);
 									challengerAvailable = true;
@@ -585,21 +585,21 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 									// ... and set the duo on the list on the server
 									server.addChallengePartners(nameChallenger, nameToBeChallenged);
 								} else {
-									clientHandler.sendMessageToClient("PLayer is already challenged by somebody else...");
+									clientHandler.sendMessageToClient(CHAT + DELIMITER + "PLayer is already challenged by somebody else..." + "\n");
 								}
 								break outerloop;
 							} 
 						}
 
 					if (!challengerAvailable) {
-						clientHandler.sendMessageToClient(FAILURE + DELIMITER + PLAYERNOTAVAILABLE);
+						clientHandler.sendMessageToClient(FAILURE + DELIMITER + PLAYERNOTAVAILABLE + "\n");
 					}
 
 
 
 				} else {
 					// More than 1 argument
-					clientHandler.sendMessageToClient(FAILURE + DELIMITER + ARGUMENTSMISSING);
+					clientHandler.sendMessageToClient(FAILURE + DELIMITER + ARGUMENTSMISSING + "\n");
 				}; 
 				break;
 			}
@@ -608,20 +608,20 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 
 		case AVAILABLEPLAYERS:
 			if (this.isPendingChallenge || this.isPlaying) {
-				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
+				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND + "\n");
 				break;
 			} else {
 				List<ClientHandler> listPlayersInLobby = getListOfPlayersInLobby();
 				String sNice = "Players in the lobby: \n";
 				sNice = sNice + createStringOfListPlayers(listPlayersInLobby);
-				clientHandler.sendMessageToClient(AVAILABLEPLAYERS + DELIMITER + createSimpleStringOfListPlayers(listPlayersInLobby));
-				clientHandler.sendMessageToClient(CHAT + DELIMITER + sNice);
+				clientHandler.sendMessageToClient(AVAILABLEPLAYERS + DELIMITER + createSimpleStringOfListPlayers(listPlayersInLobby) + "\n");
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + sNice + "\n");
 				break;
 			}
 
 		case CHALLENGEACCEPTED: 
 			if (this.isPlaying) {
-				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
+				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND + "\n");
 				break;
 			} else {
 //				if (this.isPendingChallenge) {
@@ -650,23 +650,23 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 								logger.log(Level.INFO, "Starting match with " + clientHandlerOpponent.getClientName());
 
 								//Send message to the challenger
-								clientHandlerOpponent.sendMessageToClient(CHALLENGEACCEPTED);
+								clientHandlerOpponent.sendMessageToClient(CHALLENGEACCEPTED + "\n");
 
 								// BROADCAST TO PEOPLE IN LOBBY TWO PLAYERS ARE LEAVING LOBBY TO PLAY A GAME
-								server.broadcast(CHAT + DELIMITER + "[" + nameChallenger + " and " + nameChallenged + " are leaving the lobby to play a game]\n");
+								server.broadcast(CHAT + DELIMITER + "[" + nameChallenger + " and " + nameChallenged + " are leaving the lobby to play a game]" + "\n");
 
 								// GAMESTART PERSON CHALLENGED
 								String gameArgs = nameChallenged + DELIMITER + BOARDSIZE + DELIMITER + WHITE; 
-								clientHandler.sendMessageToClient(GAMESTART + DELIMITER + gameArgs);
+								clientHandler.sendMessageToClient(GAMESTART + DELIMITER + gameArgs + "\n");
 								clientHandler.setClientHandlerOpponent(clientHandlerOpponent);
 
 								// GAMESTART CHALLENGER
 								String gameArgs2 = nameChallenger + DELIMITER + BOARDSIZE + DELIMITER + BLACK; 
-								clientHandlerOpponent.sendMessageToClient(GAMESTART + DELIMITER + gameArgs2);
+								clientHandlerOpponent.sendMessageToClient(GAMESTART + DELIMITER + gameArgs2 + "\n");
 								clientHandlerOpponent.setPendingChallengeStatus(false);
 
 								// GAMESTART TO SERVER FROM THE PERSON CHALLENGED
-								clientHandler.sendMessageToServer(GAMESTART + DELIMITER + gameArgs);
+								clientHandler.sendMessageToServer(GAMESTART + DELIMITER + gameArgs + "\n");
 
 								break outerloop;
 							}
@@ -676,7 +676,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 			}
 		case CHALLENGEDENIED:
 			if (this.isPlaying) {
-				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
+				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND + "\n");
 				break;
 			} else {
 				HashMap<String, String> challengePartners = server.getChallengePartners();
@@ -689,7 +689,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 						for (Entry<String, String> entry : challengePartners.entrySet()) {
 							if ( nameChallenger.equals( entry.getValue() ) ) {
 								nameChallenged = entry.getKey().trim();
-								clientHandler.sendMessageToClient("Your challenge has been denied by " + nameChallenged + ", please try again!");
+								clientHandler.sendMessageToClient(CHAT + DELIMITER +"Your challenge has been denied by " + nameChallenged + ", please try again!" + "\n");
 								break extraloop;
 							}
 						}
@@ -708,9 +708,9 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 						for (ClientHandler temp : availablePlayers) {
 							// temp is the challenger
 							if(temp.getClientName().trim().equals(nameChallenger)) {
-								temp.sendMessageToClient(CHALLENGEDENIED);
-								temp.sendMessageToServer(CHALLENGEDENIED);
-								clientHandler.sendMessageToClient("Your denial has been sent to " + nameChallenger);
+								temp.sendMessageToClient(CHALLENGEDENIED + "\n");
+								temp.sendMessageToServer(CHALLENGEDENIED + "\n");
+								clientHandler.sendMessageToClient(CHAT + DELIMITER + "Your denial has been sent to " + nameChallenger + "\n");
 								clientHandler.setIsAlreadyChallenged(false);
 								break outerloop;
 							}
@@ -727,7 +727,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 		case OBSERVE: 
 			if (isInLobby && !isAlreadyChallenged && !isPendingChallenge) {
 				if (amountArgs == 0) {
-					clientHandler.sendMessageToServer(CURRENTGAMES);
+					clientHandler.sendMessageToServer(CURRENTGAMES + "\n");
 				} else if (amountArgs == 1) {
 					String namePlayer = stringParts[1].trim();
 					// TODO: GET THE OBSERVER STATUS RIGHT
@@ -738,23 +738,23 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 						if (observedPlayer.getIsPlaying()) {
 							Player[] observedPlayers = observedPlayer.getCurrentGameServer().getCurrentGame().getPlayers();
 							String messageObserveGame = OBSERVEDGAME + DELIMITER + WHITE + DELIMITER + observedPlayers[1].getName() + DELIMITER + BLACK + DELIMITER + observedPlayers[0].getName() + DELIMITER + "Board size: " + BOARDSIZE;
-							clientHandler.sendMessageToClient(messageObserveGame);
-							//								clientHandler.sendMessageToClient("Observering game of " + namePlayer);
+							clientHandler.sendMessageToClient(messageObserveGame + "\n");
+							//								clientHandler.sendMessageToClient(CHAT + DELIMITER + "Observering game of " + namePlayer);
 							clientHandler.setIsObserving(true);
 							clientHandler.setIsInLobby(false);
 							clientHandler.setObserverModeOn(observedPlayer);
 						} else {
-							clientHandler.sendMessageToClient(namePlayer + " is not playing a game");
+							clientHandler.sendMessageToClient(CHAT + DELIMITER + namePlayer + " is not playing a game" + "\n");
 						}
 					} else {
-						clientHandler.sendMessageToClient("The player does not exist");
+						clientHandler.sendMessageToClient(CHAT + DELIMITER + "The player does not exist" + "\n");
 					}
 
 				} else if (amountArgs > 1) {
-					clientHandler.sendMessageToClient(FAILURE + DELIMITER + ARGUMENTSMISSING);
+					clientHandler.sendMessageToClient(FAILURE + DELIMITER + ARGUMENTSMISSING + "\n");
 				}; 
 			} else {
-				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
+				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND + "\n");
 			}
 			break; 
 			//		case NOGAMESPLAYING: 
@@ -763,14 +763,14 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 			//			break; 
 		case CURRENTGAMES: 
 			if (this.isPlaying) {
-				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
+				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND + "\n");
 				break;
 			} else {
 //				List<ClientHandler> listOfPlayersPlaying = getListOfPlayersPlaying();
 //				String strListPlaying = "";
 				Set<GoGameServer> games = server.getServerThreadObserver().getGameThreads();
 				if (games.size() == 0) {
-					clientHandler.sendMessageToClient(NOGAMESPLAYING);
+					clientHandler.sendMessageToClient(NOGAMESPLAYING + "\n");
 				} else {
 //					strListPlaying = createStringOfListPlayers(listOfPlayersPlaying);
 					String s = "\n";
@@ -779,7 +779,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 						s = s + i + ". " + game.getName() + ": " + game.getCurrentGame().getPlayers()[0].getName() + " (Black) vs. " + game.getCurrentGame().getPlayers()[1].getName() + " (White) \n";
 						i++;
 					}
-					clientHandler.sendMessageToClient(CURRENTGAMES + DELIMITER + s);
+					clientHandler.sendMessageToClient(CURRENTGAMES + DELIMITER + s + "\n");
 					
 				}
 
@@ -796,20 +796,20 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 			
 			// TODO: Prio2. Get the strategies right (parsing and shit)
 			if (this.isPlaying || this.isPendingChallenge || this.isAlreadyChallenged || this.isObserving || this.isWaitingOnRandomPlay) {
-				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND);
+				clientHandler.sendMessageToClient(FAILURE + DELIMITER + NOTAPPLICABLECOMMAND + "\n");
 				break;
 			} else {
 				if (amountArgs == 0) {
-					clientHandler.sendMessageToClient(AVAILABLESTRATEGIES + DELIMITER + RANDOMSTRATEGY + DELIMITER + CUTTINGSTRATEGY + DELIMITER + MIRRORSTRATEGY + DELIMITER + SMARTSTRATEGY);
+					clientHandler.sendMessageToClient(AVAILABLESTRATEGIES + DELIMITER + RANDOMSTRATEGY + DELIMITER + CUTTINGSTRATEGY + DELIMITER + MIRRORSTRATEGY + DELIMITER + SMARTSTRATEGY + "\n");
 				} else if (amountArgs == 1) {
 					String chosenStrategy = stringParts[1].trim();
 					nameChallenged = COMPUTER; 
 					clientHandler.setChosenStrategy(stringParts[1]);
 					String gameArgs = nameChallenged + DELIMITER + BOARDSIZE + DELIMITER + BLACK + DELIMITER + chosenStrategy;
 					//			clientHandler.sendMessageToClient(GAMESTART + DELIMITER + gameArgs);
-					clientHandler.sendMessageToServer(GAMESTART + DELIMITER + gameArgs);
+					clientHandler.sendMessageToServer(GAMESTART + DELIMITER + gameArgs + "\n");
 				} else {
-					clientHandler.sendMessageToClient(FAILURE + DELIMITER + ILLEGALARGUMENT);
+					clientHandler.sendMessageToClient(FAILURE + DELIMITER + ILLEGALARGUMENT + "\n");
 				}
 				
 				break; //PRACTICE";
@@ -824,31 +824,31 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 			//			clientHandler.sendMessageToClient(errorType);
 			//			clientHandler.sendMessageToServer(errorType);
 			if (errorType.equalsIgnoreCase(NOTAPPLICABLECOMMAND)) {
-				clientHandler.sendMessageToClient("This command is not applicable in your current state.\n");
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "This command is not applicable in your current state.\n");
 			} else if (errorType.equalsIgnoreCase(UNKNOWNCOMMAND)) {
-				clientHandler.sendMessageToClient("This is an unknown command. Please use a known command, see 'GETOPTIONS'.\n");
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "This is an unknown command. Please use a known command, see 'GETOPTIONS'.\n");
 			} else if (errorType.equalsIgnoreCase(ARGUMENTSMISSING)) {
-				clientHandler.sendMessageToClient("This command comes with other arguments.\n");
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "This command comes with other arguments.\n");
 			} else if (errorType.equalsIgnoreCase(NOTSUPPORTEDCOMMAND)) {
-				clientHandler.sendMessageToClient("This command is not supported by the server.\n");
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "This command is not supported by the server.\n");
 			} else if (errorType.equalsIgnoreCase(INVALIDNAME)) {
-				clientHandler.sendMessageToClient("This command is ... "); 
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "This command is ... "); 
 			} else if (errorType.equalsIgnoreCase(NAMETAKEN)) {
-				clientHandler.sendMessageToClient("This command is ... "); 
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "This command is ... "); 
 			} else if (errorType.equalsIgnoreCase(NAMENOTALLOWED)) {
-				clientHandler.sendMessageToClient("This command is ... "); 
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "This command is ... "); 
 			} else if (errorType.equalsIgnoreCase(INVALIDMOVE)) {
-				clientHandler.sendMessageToClient("No valid input, try again... \n"); 
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "No valid input, try again... \n"); 
 			} else if (errorType.equalsIgnoreCase(NOTYOURTURN)) {
-				clientHandler.sendMessageToClient("This command is ... "); 
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "This command is ... "); 
 			} else if (errorType.equalsIgnoreCase(ILLEGALARGUMENT)) {
-				clientHandler.sendMessageToClient("This command is ... "); 
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "This command is ... "); 
 			} else if (errorType.equalsIgnoreCase(OTHERPLAYERCANNOTCHAT)) {
-				clientHandler.sendMessageToClient("This command is ... "); 
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "This command is ... "); 
 			} else if (errorType.equalsIgnoreCase(PLAYERNOTAVAILABLE)) {
-				clientHandler.sendMessageToClient("The player you inputted is (currently) not available."); 
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "The player you inputted is (currently) not available."); 
 			} else if (errorType.equalsIgnoreCase(GAMENOTPLAYING)) {
-				clientHandler.sendMessageToClient("This command is ... "); 
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "This command is ... "); 
 			}
 
 			break; 
@@ -859,8 +859,8 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 			// ADDITIONAL COMMANDS
 		case GETEXTENSIONS:
 			//TODO OPTIONELE COMMANDOS
-			clientHandler.sendMessageToClient(CHAT + DELIMITER + LINEBREAK + "Additional commands are: \n 1. GETSTATUS \n 2. TBA \n" + LINEBREAK);
-			clientHandler.sendMessageToClient(EXTENSIONS + DELIMITER + GETSTATUS);
+			clientHandler.sendMessageToClient(CHAT + DELIMITER + LINEBREAK + "Additional commands are: \n 1. GETSTATUS \n 2. TBA \n" + LINEBREAK+ "\n");
+			clientHandler.sendMessageToClient(EXTENSIONS + DELIMITER + GETSTATUS+ "\n");
 			break;
 		case EXTENSIONS:
 			//TODO, lijst van optionele commando's sturen
@@ -875,7 +875,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 					"\nWaiting for move opponent: " + isWaitingOnTurn + 
 					"\nObserving: " + isObserving +
 					"\nWaiting for a random play: " + isWaitingOnRandomPlay + "\n" + LINEBREAK ;
-			clientHandler.sendMessageToClient(STATUS + DELIMITER + statusString);
+			clientHandler.sendMessageToClient(STATUS + DELIMITER + statusString+ "\n");
 			break;
 			// REMOVING THREAD
 		case CLIENTEXIT:
@@ -891,13 +891,13 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 		case CHANGENAME:
 			if (amountArgs == 0) {
 				// No input name
-				clientHandler.sendMessageToClient(FAILURE + DELIMITER + ARGUMENTSMISSING);
+				clientHandler.sendMessageToClient(FAILURE + DELIMITER + ARGUMENTSMISSING + "\n");
 			} else if (amountArgs == 1) {
 				String newName = stringParts[1].trim();
 				clientHandler.setClientName(newName);
-				clientHandler.sendMessageToClient("Your name has been changed to " + newName);
+				clientHandler.sendMessageToClient(CHAT + DELIMITER + "Your name has been changed to " + newName);
 			} else {
-				clientHandler.sendMessageToClient(FAILURE + DELIMITER + ARGUMENTSMISSING);
+				clientHandler.sendMessageToClient(FAILURE + DELIMITER + ARGUMENTSMISSING + "\n");
 			}
 			break;
 			// NOT RECOGNISED	
@@ -911,7 +911,7 @@ public class NetworkIOParser implements Constants4, AdditionalConstants {
 			//			System.out.println("Not parsing");
 			//			outputCommand = UNKNOWNCOMMAND;
 			//			System.out.println("Command sent to " + clientHandler.getClientName() + ": " + outputCommand);
-			clientHandler.sendMessageToClient(FAILURE + DELIMITER + UNKNOWNCOMMAND);	
+			clientHandler.sendMessageToClient(FAILURE + DELIMITER + UNKNOWNCOMMAND + "\n");	
 			break;
 		}
 		return outputCommand;
