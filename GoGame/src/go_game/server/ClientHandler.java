@@ -176,7 +176,7 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	public void announce() throws IOException {
-		server.broadcast(CHAT + DELIMITER + "[" + clientName + " has entered the lobby]");
+		server.broadcast(CHAT + DELIMITER + "[" + clientName + " has entered the lobby]" + "\n");
 	}
 
 	/**
@@ -247,7 +247,7 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 		boolean nameIsTaken = true;
 		boolean nameIsInvalid = true;
 		boolean nameIsNotAllowed = true;
-		sendMessageToClient(CHAT + DELIMITER + "[You are currently in the waiting room, checking for double names]\n");
+		sendMessageToClient(CHAT + DELIMITER + "[You are currently in the waiting room, checking for double names]" + "\n");
 		//		while (nameIsTaken || nameIsInvalid || nameIsNotAllowed) {
 		String clientCurrentName = getClientName().trim();
 		
@@ -255,23 +255,23 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 		if (nameIsTaken) {
 			// Name is taken failure and suggestion
 			sendMessageToClient(CHAT + DELIMITER + "Suggestion for name: " + server.nameSuggestor(clientCurrentName) + "\n");
-			sendMessageToClient(FAILURE + DELIMITER + NAMETAKEN);
+			sendMessageToClient(FAILURE + DELIMITER + NAMETAKEN + "\n");
 			
 		}
 
 		nameIsNotAllowed = server.checkNotAllowedName(clientCurrentName);
 		if (nameIsNotAllowed) {
 			System.out.println("Kom ik hier?");
-			sendMessageToClient(CHAT + DELIMITER + "The name " + clientCurrentName + " is specifically not allowed.\n");
-			sendMessageToClient(FAILURE + DELIMITER + NAMENOTALLOWED);
+			sendMessageToClient(CHAT + DELIMITER + "The name " + clientCurrentName + " is specifically not allowed." + "\n");
+			sendMessageToClient(FAILURE + DELIMITER + NAMENOTALLOWED + "\n");
 			
 			System.out.println("Kom ik hier ook?");
 		}
 
 		nameIsInvalid = server.checkInvalidName(clientCurrentName);
 		if (nameIsInvalid) { 
-			sendMessageToClient(CHAT + DELIMITER + "The name " + clientCurrentName + " is invalid.\n");
-			sendMessageToClient(FAILURE + DELIMITER + INVALIDNAME);
+			sendMessageToClient(CHAT + DELIMITER + "The name " + clientCurrentName + " is invalid." + "\n");
+			sendMessageToClient(FAILURE + DELIMITER + INVALIDNAME + "\n");
 			
 		}
 
@@ -279,9 +279,9 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 			// Change the status
 			setIsInWaitingRoom(false);
 			setIsInLobby(true);
-			sendMessageToClient(NEWPLAYERACCEPTED);
-			sendMessageToServer(GETOPTIONS);
-			sendMessageToServer(GETEXTENSIONS);
+			sendMessageToClient(NEWPLAYERACCEPTED + "\n");
+			sendMessageToServer(GETOPTIONS + "\n");
+			sendMessageToServer(GETEXTENSIONS + "\n");
 			try {
 				announce();
 			} catch (IOException e) {
@@ -401,7 +401,7 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 	// SENT MOVE COMMANDS
 	public boolean sentParsedMoveToGoGameServer(int xCo, int yCo) {
 		logger.log(Level.INFO,"A (x,y) move has been registered by the client handler");
-		this.sendMessageToClient(CHAT + "\nYour move is registered, checking validity...\n");
+		this.sendMessageToClient(CHAT + "\nYour move is registered, checking validity..." + "\n");
 
 		this.lastMove[0] = xCo;
 		this.lastMove[1] = yCo;
@@ -420,7 +420,7 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 	 */
 	public boolean sentParsedMoveToGoGameServer(String passMove) {
 		logger.log(Level.INFO,"A passing move has been registered by the client handler");
-		this.sendMessageToClient("\nYour pass move is registered\n");
+		this.sendMessageToClient("\nYour pass move is registered" + "\n");
 
 		// Toggle the boolean, die wordt opgevraagd door de human player player (blijft tot die tijd in een while loop hangen)
 		setMoveHasBeenMade(true);
@@ -437,7 +437,7 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 	 */
 	public boolean sentParsedMoveToGoGameServer(int fieldIndex) {
 		logger.log(Level.INFO,"A fieldIndex move has been registered by the client handler");
-		this.sendMessageToClient("\n Your fieldIndex move is registered \n");
+		this.sendMessageToClient("\n Your fieldIndex move is registered" + "\n");
 
 		// Toggle the boolean, die wordt opgevraagd door de human player player (blijft tot die tijd in een while loop hangen)
 		setMoveHasBeenMade(true);
@@ -462,9 +462,9 @@ public class ClientHandler extends Thread implements Constants4, AdditionalConst
 		observeGoGameServer.addObserver(this);
 		int blackCaptives = observeGame.getPlayers()[0].getPrisonersTaken();
 		int whiteCaptives = observeGame.getPlayers()[1].getPrisonersTaken();
-		sendMessageToClient(BOARD + DELIMITER + observeGame.getCurrentBoard().createStringRepresentationBoard(observeGame.getCurrentBoard()) + DELIMITER + blackCaptives + DELIMITER + whiteCaptives);
+		sendMessageToClient(BOARD + DELIMITER + observeGame.getCurrentBoard().createStringRepresentationBoard(observeGame.getCurrentBoard()) + DELIMITER + blackCaptives + DELIMITER + whiteCaptives + "\n");
 //		sendMessageToClient(CHAT + DELIMITER + observeGame.getCurrentBoard().toStringOnCommandLine());
-		this.observeGoGameServer.sendMessageBoth(CHAT + DELIMITER + this.getClientName() + " is now observing your game.");
+		this.observeGoGameServer.sendMessageBoth(CHAT + DELIMITER + this.getClientName() + " is now observing your game." + "\n");
 	}
 
 	/**

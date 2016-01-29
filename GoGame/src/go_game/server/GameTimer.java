@@ -51,7 +51,7 @@ public class GameTimer implements Constants4 {
 		
 		// Set up timer
 		TimerExceeded = false;
-		System.out.println("Schedule set on" + new Date() + " for " + timeOutInSeconds + " seconds \n");
+		System.out.println("Schedule set on" + new Date() + " for " + timeOutInSeconds + " seconds" + "\n");
         timer = new Timer();
         timer.schedule(new RemindTask(),
                        0,        //initial delay
@@ -88,7 +88,7 @@ public class GameTimer implements Constants4 {
 	 * Notification.
 	 */
 	private void notification() {
-		player.sentMessage(CHAT + DELIMITER + "Time left: " + ((reminderIntervalsMilliSeconds * amountWarnings)/1000) + " seconds\n");
+		player.sentMessage(CHAT + DELIMITER + "Time left: " + ((reminderIntervalsMilliSeconds * amountWarnings)/1000) + " seconds" + "\n");
 //		System.out.println("Notification sent" + new Date() + "\n");
 	}
 
@@ -97,7 +97,7 @@ public class GameTimer implements Constants4 {
 	 */
 	private void completeTask() {
 
-		player.sentMessage(CHAT + DELIMITER + "Your thinking time has passed, you lose the game! \n");
+		player.sentMessage(CHAT + DELIMITER + "Your thinking time has passed, you lose the game!" + "\n");
 		player.setTimedOut(true);
 		timer.cancel();
 

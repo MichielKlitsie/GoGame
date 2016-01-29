@@ -16,7 +16,8 @@ public class GameTimerTest {
 	@Before
 	public void setUp() throws Exception {
 //		gameTimerTask = new GameTimer();
-		gameTimer = new GameTimer();
+		
+		gameTimer = new GameTimer(10, null);
 		System.out.println("Set up done");
 		
 	}

@@ -88,7 +88,7 @@ public class ServerTimer implements Constants4 {
 	 * Notification.
 	 */
 	private void notification() {
-		clientHandler.sendMessageToClient(CHAT + DELIMITER + "Time left: " + ((reminderIntervalsMilliSeconds * amountWarnings)/1000) + " seconds\n");
+		clientHandler.sendMessageToClient(CHAT + DELIMITER + "Time left: " + ((reminderIntervalsMilliSeconds * amountWarnings)/1000) + " seconds" + "\n");
 //		System.out.println("Notification sent" + new Date() + "\n");
 	}
 
@@ -97,9 +97,9 @@ public class ServerTimer implements Constants4 {
 	 */
 	private void completeTask() {
 		timer.cancel();
-		clientHandler.sendMessageToClient(CHAT + DELIMITER + "TIMEOUT has occurred. You are kicked off the server \n");
-		clientHandler.sendMessageToClient(QUIT);
-		clientHandler.sendMessageToServer(QUIT);
+		clientHandler.sendMessageToClient(CHAT + DELIMITER + "TIMEOUT has occurred. You are kicked off the server" + "\n");
+		clientHandler.sendMessageToClient(QUIT + "\n");
+		clientHandler.sendMessageToServer(QUIT + "\n");
 //		clientHandler.shutdown();
 		
 

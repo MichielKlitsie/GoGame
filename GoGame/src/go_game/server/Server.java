@@ -276,7 +276,7 @@ public class Server extends Thread implements Constants4 {
 			Iterator<ClientHandler> threadsIterator = clientHandlerThreads.iterator();
 			while (threadsIterator.hasNext()) {
 				ClientHandler currentThread = threadsIterator.next();
-				currentThread.sendMessageToClient(msg);
+				currentThread.sendMessageToClient(msg + "\n");
 			}
 		}
 	}
@@ -292,7 +292,7 @@ public class Server extends Thread implements Constants4 {
 		// Loop through threads-list and send the message
 		List<ClientHandler> playerInLobby = getPlayersInLobby();
 		for (ClientHandler currentClientHandler : playerInLobby) {
-			currentClientHandler.sendMessageToClient(msg);
+			currentClientHandler.sendMessageToClient(msg + "\n");
 		}
 
 	}
